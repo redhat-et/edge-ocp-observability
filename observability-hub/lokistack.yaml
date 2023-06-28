@@ -1,0 +1,27 @@
+apiVersion: loki.grafana.com/v1
+kind: LokiStack
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"loki.grafana.com/v1","kind":"LokiStack","metadata":{"annotations":{},"name":"lokistack-sample","namespace":"observability"},"spec":{"size":"1x.extra-small","storage":{"secret":{"name":"minio-loki","type":"s3"}},"storageClassName":"gp2-csi","tenants":{"mode":"openshift-logging"}}}
+    loki.grafana.com/certRotationRequiredAt: "2023-06-18T17:11:04Z"
+    loki.grafana.com/rulesDiscoveredAt: "2023-06-23T13:17:44Z"
+  name: lokistack-sample
+  namespace: observability
+spec:
+  managementState: Managed
+  size: 1x.extra-small
+  storage:
+    schemas:
+    - effectiveDate: "2020-10-11"
+      version: v11
+    secret:
+      name: minio-loki
+      type: s3
+  storageClassName: gp2-csi
+  tenants:
+    mode: openshift-logging
+  storage:
+    schemas:
+    - effectiveDate: "2020-10-11"
+      version: v11

@@ -1,0 +1,42 @@
+---
+spec:
+  template:
+    spec:
+      volumes:
+      - configMap:
+          name: otelcol
+        name: otelconfig
+      - configMap:
+          name: client-ca
+        name: client-ca
+      - configMap:
+          name: edge-token
+        name: edge-token
+      - configMap:
+          name: otelcol-cabundle
+        name: cabundle-volume
+      containers:
+      - name: otc-container
+        imagePullPolicy: IfNotPresent
+        args:
+          - "--config=/conf/config/otelconfig.yaml"
+        image: quay.io/sallyom/ubi8-otelcolcontrib:latest
+        resources:
+          limits:
+            cpu: 200m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        ports:
+        - containerPort: 4317 # Default endpoint for OpenTelemetry receiver.
+        - containerPort: 4318 # Default endpoint for OpenTelemetry receiver.
+        volumeMounts:
+        - mountPath: /conf/ca
+          name: client-ca
+        - mountPath: /conf/edge-token
+          name: edge-token
+        - mountPath: /conf/config
+          name: otelconfig
+        - mountPath: /etc/pki/ca-trust/source/service-ca
+          name: cabundle-volume

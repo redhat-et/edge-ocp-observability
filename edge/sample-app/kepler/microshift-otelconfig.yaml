@@ -1,0 +1,47 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otelcol
+  labels:
+    otel: collect
+data:
+  otelconfig.yaml: |
+    extensions:
+      bearertokenauth:
+        filename: /conf/edge-token/edge-token
+    receivers:
+      otlp:
+        protocols:
+          http:
+          grpc:
+      prometheus:
+        config:
+          scrape_configs:
+          - job_name: 'kepler-in-cluster-collector'
+            scrape_interval: 5s
+            static_configs:
+             # any target listed must have a networkpolicy allowing opentelemetry collector access to metrics
+            - targets: ['127.0.0.1:9102'] # application metrics endpoint
+    processors:
+      memory_limiter:
+        check_interval: 5s
+        limit_percentage: 95
+        spike_limit_percentage: 25
+      batch:
+    exporters:
+      logging:
+        verbosity: detailed
+      prometheusremotewrite:
+        endpoint: https://thanos-receive-thanos.apps.open-svc-sts.k1wl.p1.openshiftapps.com/api/v1/receive
+        auth:
+          authenticator: bearertokenauth
+        tls:
+          insecure: false
+          ca_file: /conf/ca/ca.crt
+    service:
+      extensions: [bearertokenauth]
+      pipelines:
+        metrics:
+          receivers: [prometheus]
+          exporters: [prometheusremotewrite]

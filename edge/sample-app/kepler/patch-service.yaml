@@ -1,0 +1,9 @@
+---
+spec:
+  ports:
+  - name: otlp
+    port: 4317
+    protocol: TCP
+  - name: otlphttp
+    port: 4318
+    protocol: TCP

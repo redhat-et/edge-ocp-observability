@@ -1,0 +1,73 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otelcol
+  labels:
+    otel: collect
+data:
+  otel-collector-config: |
+    extensions:
+      bearertokenauth:
+        filename: /conf/edge-token/edge-token
+    receivers:
+      otlp:
+        protocols:
+          http:
+          grpc:
+      prometheus:
+      # see https://github.com/quarkusio/quarkus-super-heroes/blob/main/deploy/k8s/monitoring-kubernetes.yml
+        config:
+          global:
+            scrape_interval: 10s
+            external_labels:
+              system: quarkus-super-heroes
+          scrape_configs:
+            - job_name: quarkus-event-statistics
+              static_configs:
+                - targets: ['event-statistics.sample-app.svc:9090']
+            - job_name: quarkus-rest-villains
+              static_configs:
+                - targets: ['rest-villains.sample-app.svc:9090']
+            - job_name: quarkus-rest-heroes
+              static_configs:
+                - targets: ['rest-heroes.sample-app.svc:9090']
+            - job_name: quarkus-rest-fights
+              static_configs:
+                - targets: ['rest-fights.sample-app.svc:9090']
+    processors:
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 2000
+        spike_limit_mib: 400
+      batch:
+    exporters:
+      otlphttp:
+        # endpoint: https://OCP_ROUTE_OTELCOL
+        endpoint: https://otelcol-thanos.apps.ci-ln-w3ydddb-76ef8.origin-ci-int-aws.dev.rhcloud.com # otel-collector service route from OCP, port 4318
+        auth:
+          authenticator: bearertokenauth
+        tls:
+          insecure: false
+          ca_file: /conf/ca/ca.crt
+      logging:
+        verbosity: detailed
+      prometheusremotewrite/ocp:
+        # endpoint: https://OCP_ROUTE_THANOS_RECEIVE/api/v1/receive
+        endpoint: https://thanos-receive-thanos.apps.ci-ln-w3ydddb-76ef8.origin-ci-int-aws.dev.rhcloud.com/api/v1/receive
+        auth:
+          authenticator: bearertokenauth
+        tls:
+          insecure: false
+          ca_file: /conf/ca/ca.crt
+    service:
+      extensions: [bearertokenauth]
+      pipelines:
+        metrics:
+          receivers: [prometheus]
+          processors: [batch]
+          exporters: [prometheusremotewrite/ocp,logging]
+        traces:
+          receivers: [otlp]
+          processors: [batch,memory_limiter]
+          exporters: [logging,otlphttp]

@@ -1,0 +1,9 @@
+apiVersion: apps/v1
+kind: Daemonset
+metadata:
+  name: kepler-exporter
+  namespace: kepler
+spec:
+  template:
+    spec:
+      hostNetwork: true

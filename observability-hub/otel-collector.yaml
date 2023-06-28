@@ -1,0 +1,113 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: ingest
+  namespace: observability
+spec:
+  mode: statefulset
+  replicas: 1
+  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.74.0
+  volumeMounts:
+  - name: cabundle-volume
+    mountPath: /etc/pki/ca-trust/source/service-ca
+    readOnly: true
+  - name: wal
+    mountPath: /usr/share/wal
+  volumes:
+  - name: cabundle-volume
+    configMap:
+      name: otelcol-cabundle
+  - name: wal
+  volumeClaimTemplates:
+    - metadata:
+        name: wal
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
+  resources:
+    limits:
+      cpu: 100m
+      memory: 200Mi
+    requests:
+      cpu: 50m
+      memory: 50Mi
+  serviceAccount: otel-sa
+  config: |
+    extensions:
+      basicauth:
+        htpasswd:
+          inline: |
+            rhel:rhel
+      bearertokenauth:
+        scheme: "Bearer"
+        filename: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+
+      file_storage/traces:
+        directory: /usr/share/wal
+        timeout: 5s
+      memory_ballast:
+        size_in_percentage: 30
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            auth:
+              authenticator: basicauth
+          http:
+            auth:
+              authenticator: basicauth
+      # Collect own metrics
+      # prometheus:
+      #   config:
+      #     scrape_configs:
+      #       - job_name: 'otel-collector'
+      #         scrape_interval: 10s
+      #         static_configs:
+      #           - targets: [ '0.0.0.0:8888' ]
+    processors:
+      batch:
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 80
+        spike_limit_percentage: 25
+    exporters:
+      logging:
+        verbosity: detailed
+      loki:
+        endpoint: https://lokistack-sample-gateway-http.observability.svc.cluster.local:8080/api/logs/v1/application/loki/api/v1/push
+        tls:
+          ca_file: "/etc/pki/ca-trust/source/service-ca/service-ca.crt"
+        auth:
+          authenticator: bearertokenauth
+      prometheusremotewrite:
+        endpoint: http://sample-monitoring-stack-prometheus.observability.svc.cluster.local:9090/api/v1/write
+        tls:
+          insecure: true
+          #ca_file: "/etc/pki/ca-trust/source/service-ca/service-ca.crt"
+
+      otlp/traces:
+        endpoint: tempo-simplest-gateway.observability.svc.cluster.local:8090
+        headers:
+          x-scope-orgid: "prod"
+        auth:
+          authenticator: bearertokenauth
+        tls:
+          ca_file: "/etc/pki/ca-trust/source/service-ca/service-ca.crt"
+    service:
+      # extensions: [memory_ballast, basicauth, file_storage/traces]
+      extensions: [basicauth,bearertokenauth]
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlp/traces]
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [prometheusremotewrite]
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [loki]

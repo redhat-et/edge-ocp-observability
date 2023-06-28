@@ -1,0 +1,50 @@
+extensions:
+  bearertokenauth:
+    filename: /conf/edge-token
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+      - job_name: 'pmproxy-rhedge'
+        scrape_interval: 5s
+        static_configs:
+        - targets: ['127.0.0.1:44322'] # Performance Co-Pilot endpoint
+      - job_name: 'kepler'
+        scrape_interval: 5s
+        static_configs:
+        - targets: ['127.0.0.1:9102'] # Kepler endpoint
+processors:
+  batch:
+  memory_limiter:
+    check_interval: 5s
+    limit_percentage: 95
+    spike_limit_percentage: 25
+exporters:
+  prometheusremotewrite/ocp:
+    endpoint: https://thanos-receive-thanos.apps.open-svc-sts.k1wl.p1.openshiftapps.com/api/v1/receive
+    #remote_write_queue:
+    #  enabled: true
+    #wal:
+    #  buffer_size: 100
+    #  directory: /otc
+    #  truncate_frequency: 45s
+    external_labels:
+      host: rh-device-edge-aws
+      userid: 123456
+    auth:
+      authenticator: bearertokenauth
+    tls:
+      insecure: false
+      ca_file: /conf/ca.crt
+  logging:
+    verbosity: detailed
+service:
+  extensions: [bearertokenauth]
+  telemetry:
+    metrics:
+      level: detailed
+      address: 0.0.0.0:8887
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      exporters: [prometheusremotewrite/ocp]

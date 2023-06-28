@@ -1,0 +1,11 @@
+---
+# This file is meant to be applied with an OpenShift cluster
+# This creates a configmap with the CA for TLS and an OpenTelemetryCollector CR
+# Apply this if running the OpenTelemetry Operator
+# This applies in 'kepler' namespace, modify if running elsewhere
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+  name: otelcol-cabundle
