@@ -18,7 +18,7 @@ data:
       prometheus:
         config:
           scrape_configs:
-          - job_name: 'kepler-in-cluster-collector'
+          - job_name: 'kepler-in-cluster'
             scrape_interval: 5s
             static_configs:
              # any target listed must have a networkpolicy allowing opentelemetry collector access to metrics

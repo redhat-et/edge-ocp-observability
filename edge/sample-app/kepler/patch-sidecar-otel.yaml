@@ -28,9 +28,6 @@ spec:
           requests:
             cpu: 100m
             memory: 200Mi
-        ports:
-        - containerPort: 4317 # Default endpoint for OpenTelemetry receiver.
-        - containerPort: 4318 # Default endpoint for OpenTelemetry receiver.
         volumeMounts:
         - mountPath: /conf/ca
           name: client-ca
