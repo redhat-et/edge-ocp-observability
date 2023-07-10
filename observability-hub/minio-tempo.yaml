@@ -1,0 +1,53 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: minio-tempo
+  namespace: observability
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: minio-tempo
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/name: minio-tempo
+    spec:
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: minio-tempo
+      containers:
+        - resources: {}
+          terminationMessagePath: /dev/termination-log
+          name: minio-tempo
+          command:
+            - /bin/sh
+            - '-c'
+            - |
+              mkdir -p /storage/tempo && \
+              minio server /storage
+          env:
+            - name: MINIO_ROOT_USER
+              value: tempo
+            - name: MINIO_ROOT_PASSWORD
+              value: supersecret
+          ports:
+            - containerPort: 9000
+              protocol: TCP
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: storage
+              mountPath: /storage
+          terminationMessagePolicy: File
+          image: minio/minio
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+  strategy:
+    type: Recreate
+  progressDeadlineSeconds: 600
+

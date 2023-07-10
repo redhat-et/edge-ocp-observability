@@ -4,8 +4,8 @@ metadata:
   finalizers:
   - kubernetes.io/pvc-protection
   labels:
-    app.kubernetes.io/name: minio-loki
-  name: minio-loki
+    app.kubernetes.io/name: minio-tempo
+  name: minio-tempo
   namespace: observability
 spec:
   accessModes:
@@ -14,3 +14,4 @@ spec:
     requests:
       storage: 2Gi
   volumeMode: Filesystem
+

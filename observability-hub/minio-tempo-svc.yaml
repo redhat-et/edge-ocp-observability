@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: minio-tempo
+  namespace: observability
+spec:
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
+  internalTrafficPolicy: Cluster
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: minio-tempo

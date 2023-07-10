@@ -1,0 +1,54 @@
+apiVersion: tempo.grafana.com/v1alpha1
+kind: TempoStack
+metadata:
+  name: tempostack
+  namespace: observability
+spec:
+  observability:
+    tracing:
+      jaeger_agent_endpoint: 'localhost:6831'
+  resources:
+    total:
+      limits:
+        cpu: '2'
+        memory: 2Gi
+  search:
+    defaultResultLimit: 20
+    maxDuration: 0s
+  tenants:
+    authentication:
+      - tenantId: 1610b0c3-c509-4592-a256-a1871353dbfa
+        tenantName: dev
+      - tenantId: 1610b0c3-c509-4592-a256-a1871353dbfb
+        tenantName: prod
+    mode: openshift
+  limits:
+    global:
+      ingestion: {}
+      query:
+        maxSearchBytesPerTrace: 0
+  template:
+    compactor: {}
+    distributor:
+      replicas: 1
+    gateway:
+      component: {}
+      enabled: true
+    ingester:
+      replicas: 1
+    querier: {}
+    queryFrontend:
+      component: {}
+      jaegerQuery:
+        enabled: true
+        ingress:
+          route: {}
+  replicationFactor: 1
+  storage:
+    secret:
+      name: minio-tempo
+      type: s3
+  storageSize: 1Gi
+  retention:
+    global:
+      traces: 48h0m0s
