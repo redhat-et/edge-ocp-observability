@@ -5,4 +5,4 @@ metadata:
   labels:
     app: grafana
 spec:
-  url: https://raw.githubusercontent.com/sallyom/microshift-observability/main/manifests/edge-pcp-to-ocp/dashboard-pcp-prometheus/dashboard/pcp-prom-host-overview.json
+  url: https://raw.githubusercontent.com/redhat-et/main/edge/edge-pcp-to-ocp/dashboard-pcp-prometheus/dashboard/pcp-prom-host-overview.json

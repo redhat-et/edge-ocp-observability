@@ -21,14 +21,9 @@ processors:
     limit_percentage: 95
     spike_limit_percentage: 25
 exporters:
-  logging:
-    verbosity: info
   otlphttp:
     #endpoint: https://OCP_ROUTE_OTELCOL
     endpoint: https://otlp-https.apps.open-svc-sts.k1wl.p1.openshiftapps.com # otel-collector service route from OCP, port 4318
-    external_labels:
-      host: rhel9edge 
-      userid: 123456
     auth:
       authenticator: basicauth/client
     tls:

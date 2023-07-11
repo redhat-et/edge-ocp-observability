@@ -9,3 +9,10 @@ The following cmd will:
 ```bash
 $(pwd)/deploy-grafana.sh
 ```
+
+If there is already a Prometheus Datasource in Grafana configured, this is the command
+to deploy a GrafanaDashboard for PCP:
+
+```bash
+oc apply -f ./dashboard/04-grafana-dashboard.yaml 
+```

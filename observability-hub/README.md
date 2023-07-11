@@ -46,7 +46,7 @@ Logging Backend (Loki with Minio container for s3 storage)
 ```bash
 # edit storageclassName & secret as necessary
 # secret and storage for testing only
-oc apply -f minio-secret.yaml -n observability
+oc apply -f minio-secret-loki.yaml -n observability
 oc apply -f minio-loki-pvc.yaml -n observability
 oc apply -f minio-loki-svc.yaml -n observability
 oc apply -f minio-loki.yaml -n observability

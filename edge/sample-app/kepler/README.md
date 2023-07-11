@@ -59,7 +59,7 @@ ls ~/ca.crt ~/edge-token ~/otlp-endpoint
 
 The OpenTelemetry Collector can run as a sidecar container to the kepler exporter DaemonSet.
 Metrics will be sent from kepler to an OpenTelemetry Collector pod running in OpenShift. From there,
-a `prometheusremotewrite` opentelemetry collector exporter will send metrics to a thanos-receive container,
+a `prometheusremotewrite` opentelemetry collector exporter will send metrics to a Prometheus pod,
 and a Prometheus datasource in Grafana will be used to visualize the data. 
 
 #### Add collector sidecar to kepler exporter daemonset

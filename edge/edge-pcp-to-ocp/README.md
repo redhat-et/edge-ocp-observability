@@ -29,7 +29,7 @@ ls ~/ca.crt ~/otlp-endpoint
 #### Update OpenTelemetry Collector config with OCP URLs, tokens
 
 ```bash
-curl -o otelcol-config.yaml https://raw.githubusercontent.com/redhat-et/main/edge/edge-pcp-to-ocp/otelcol-config.yaml
+curl -o otelcol-config.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp-observability/main/edge/edge-pcp-to-ocp/otelcol-config.yaml
 ```
 
 Copy contents of `otlp-endpoint` to [otelcol-config.yaml](./otelcol-config.yaml).
@@ -39,7 +39,7 @@ Copy contents of `otlp-endpoint` to [otelcol-config.yaml](./otelcol-config.yaml)
 ```bash
 mkdir otc # for file-storage extension, if configured
 
-# Note the ca.crt & edge-token are assumed to exist at $(pwd)/.
+# Note the ca.crt must exist at $(pwd)/.
 
 sudo podman run --rm -d --name otelcol-host \
   --network=host \
@@ -50,7 +50,6 @@ sudo podman run --rm -d --name otelcol-host \
   -v /var/log/:/var/log  \
   -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
   -v $(pwd)/ca.crt:/conf/ca.crt:z \
-  -v $(pwd)/edge-token:/conf/edge-token:z \
   -v $(pwd)/otelcol-config.yaml:/etc/otelcol-contrib/config.yaml:z \
   -v $(pwd)/otc:/otc:z  \
   quay.io/sallyom/ubi8-otelcolcontrib:latest --config=file:/etc/otelcol-contrib/config.yaml
@@ -60,10 +59,22 @@ sudo podman run --rm -d --name otelcol-host \
 
 To view the prometheus metrics in Grafana, deploy a GrafanaDashboard for Performance Co-Pilot.
 
-Run this against the **OpenShift hub cluster**
+Run these commands against the **OpenShift hub cluster**
 
 ```bash
 cd edge/edge-pcp-to-ocp/dashboard-pcp-prometheus
+```
+
+If there is already a Grafana instance with a Prometheus Datasource in OpenShift `-n observability`, run this command to
+create a GrafanaDashboard for PCP:
+
+```bash
+oc apply -f ./dashboard/04-grafana-dashboard.yaml 
+```
+
+If a Grafana instance is not running and/or if there is not a Prometheus DataSource configured:
+
+```bash
 ./deploy-grafana.sh
 ```
 

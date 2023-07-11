@@ -10,7 +10,7 @@ metadata:
   namespace: observability
 spec:
   # host: otlp-https.base_domain
-  host: otlp-https.apps.rosa.c5r9f-f95bg-org.cy1b.p3.openshiftapps.com
+  host: otlp-https.apps.rosa.u8gts-p88nm-a23.9dnb.p3.openshiftapps.com
   port:
     targetPort: otlp-http
   tls:

@@ -9,9 +9,9 @@ spec:
       - configMap:
           name: client-ca
         name: client-ca
-      - configMap:
-          name: edge-token
-        name: edge-token
+      #- configMap:
+      #    name: edge-token
+      #  name: edge-token
       - configMap:
           name: otelcol-cabundle
         name: cabundle-volume
@@ -31,8 +31,8 @@ spec:
         volumeMounts:
         - mountPath: /conf/ca
           name: client-ca
-        - mountPath: /conf/edge-token
-          name: edge-token
+        #- mountPath: /conf/edge-token
+        #  name: edge-token
         - mountPath: /conf/config
           name: otelconfig
         - mountPath: /etc/pki/ca-trust/source/service-ca

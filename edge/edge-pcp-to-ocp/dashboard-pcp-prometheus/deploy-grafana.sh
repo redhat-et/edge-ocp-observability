@@ -10,7 +10,7 @@ done
 oc apply -f $(pwd)/dashboard/02-grafana-instance.yaml
 oc apply -f $(pwd)/dashboard/03-grafana-sa-token-secret.yaml
 
-SERVICE_ACCOUNT=thanos-querier
+SERVICE_ACCOUNT=sample-monitoring-stack-prometheus
 SECRET=grafana-sa-token
 
 while ! oc get serviceaccount $SERVICE_ACCOUNT -n observability
