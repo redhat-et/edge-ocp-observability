@@ -30,7 +30,7 @@ spec:
           value: loki
         - name: MINIO_ROOT_PASSWORD
           value: supersecret
-        image: minio/minio
+        image: quay.io/minio/minio
         imagePullPolicy: Always
         name: minio-loki
         ports:

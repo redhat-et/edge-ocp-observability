@@ -1,7 +1,6 @@
 #!/bin/sh
 
-# ensure grafana operator is running in OpenShift
-# oc apply -f $(pwd)/dashboard/01-grafana-operator.yaml
+oc apply -f $(pwd)/dashboard/01-grafana-operator.yaml
 while ! oc get grafana --all-namespaces
 do
     echo waiting for grafana custom resource definition to register
@@ -20,9 +19,8 @@ done
 # Define Prometheus datasource
 oc adm policy add-cluster-role-to-user cluster-monitoring-view -z $SERVICE_ACCOUNT -n observability
 
-
 export BEARER_TOKEN=$(oc get secret ${SECRET} -o json -n observability | jq -Mr '.data.token' | base64 -d) || or true
-# Get bearer token for `thanos-querier`
+# Get bearer token for `sample-monitoring-stack-prometheus`
 while [ -z "$BEARER_TOKEN" ]
 do
     echo waiting for service account token
@@ -39,12 +37,3 @@ done
 
 # Deploy from updated manifest
 envsubst < $(pwd)/dashboard/03-grafana-datasource-UPDATETHIS.yaml | oc apply -f -
-
-# Define Grafana dashboard
-while ! oc get grafanadashboard --all-namespaces;
-do
-    sleep 1
-    echo waiting for grafandashboard custom resource definition to register
-done
-
-oc apply -f $(pwd)/dashboard/04-grafana-dashboard.yaml

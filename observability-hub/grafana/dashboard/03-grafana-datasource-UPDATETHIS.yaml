@@ -5,7 +5,7 @@
 apiVersion: integreatly.org/v1alpha1
 kind: GrafanaDataSource
 metadata:
-  name: prometheus-grafanadatasource
+  name: prometheus-grafana
   namespace: observability
 spec:
   datasources:
@@ -22,4 +22,4 @@ spec:
         httpHeaderValue1: 'Bearer ${BEARER_TOKEN}'
       type: prometheus
       url: 'http://sample-monitoring-stack-prometheus.observability.svc.cluster.local:9090'
-  name: prometheus-grafanadatasource.yaml
+  name: prometheus-grafana.yaml

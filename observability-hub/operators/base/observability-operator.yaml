@@ -1,0 +1,12 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: observability-operator
+  namespace: openshift-operators
+spec:
+  channel: development
+  installPlanApproval: Automatic
+  name: observability-operator
+  source: community-operators
+  sourceNamespace: openshift-marketplace
+  startingCSV: observability-operator.v0.0.22

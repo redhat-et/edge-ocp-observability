@@ -14,9 +14,14 @@ Follow this README to configure an observability hub in OpenShift.
 ### Hub OpenShift cluster
 
 This image shows the list of operators installed. These are available from OperatorHub.
-(Red Hat Single Sign-On Operator is not necessary)
 
 ![Installed operators](../images/hub-installed-operators.png)
+
+Install operators with:
+
+```bash
+oc apply --kustomize observability-hub/operators/base
+```
 
 #### Operator descriptions
 
@@ -38,7 +43,7 @@ Thanos Receive can also be deployed as a sidecar to Prometheus, to enable a remo
 Metrics Backend (Prometheus with Thanos sidecar)
 
 ```bash
-oc apply -f monitoring-stack.yaml -n observability
+oc apply --kustomize observability-hub/prometheus
 ```
 
 Logging Backend (Loki with Minio container for s3 storage)
@@ -46,11 +51,7 @@ Logging Backend (Loki with Minio container for s3 storage)
 ```bash
 # edit storageclassName & secret as necessary
 # secret and storage for testing only
-oc apply -f minio-secret-loki.yaml -n observability
-oc apply -f minio-loki-pvc.yaml -n observability
-oc apply -f minio-loki-svc.yaml -n observability
-oc apply -f minio-loki.yaml -n observability
-oc apply -f lokistack.yaml -n observability
+oc apply --kustomize observability-hub/loki
 ```
 
 Tracing Backend (Tempo with Minio for S3 storage)
@@ -58,29 +59,24 @@ Tracing Backend (Tempo with Minio for S3 storage)
 ```bash
 # edit storageclassName & secret as necessary
 # secret and storage for testing only
-oc apply -f minio-secret-tempo.yaml -n observability
-oc apply -f minio-tempo-pvc.yaml -n observability
-oc apply -f minio-tempo-svc.yaml -n observability
-oc apply -f minio-tempo.yaml -n observability
-oc apply -f tempostack.yaml -n observability
+oc apply --kustomize observability-hub/tempo
 ```
 
 OpenTelemetryCollector
 
 ```bash
-oc apply -f otel-collector.yaml
-
-# edit to add correct base_domain
-oc apply -f tls-otel-collector-route.yaml
+# edit observability-hub/otel-collector/tls-otel-collector-route.yaml
+# to add correct base_domain
+oc apply --kustomize observability-hub/otel-collector
 ```
 
 #### Copy opentelemetry endpoint to edge
 
 ```bash
-oc -n observability get route tls-otel-collector -o jsonpath='{.status.ingress[*].host}' > ocp-otelcol-url
+oc -n observability get route tls-otel-collector -o jsonpath='{.status.ingress[*].host}' > otlp-endpoint
 
 # copy url to edge for configuring OTC exporter
-scp ocp-otelcol-url redhat@192.168.122.245:
+scp otlp-endpoint redhat@192.168.122.245:
 ```
 
 #### Copy OpenShift root CA to edge for TLS

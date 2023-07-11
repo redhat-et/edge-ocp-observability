@@ -61,22 +61,14 @@ To view the prometheus metrics in Grafana, deploy a GrafanaDashboard for Perform
 
 Run these commands against the **OpenShift hub cluster**
 
-```bash
-cd edge/edge-pcp-to-ocp/dashboard-pcp-prometheus
-```
-
 If there is already a Grafana instance with a Prometheus Datasource in OpenShift `-n observability`, run this command to
 create a GrafanaDashboard for PCP:
 
 ```bash
-oc apply -f ./dashboard/04-grafana-dashboard.yaml 
+oc apply -f $(pwd)/grafana-dashboard/pcp-dashboard.yaml
 ```
 
-If a Grafana instance is not running and/or if there is not a Prometheus DataSource configured:
-
-```bash
-./deploy-grafana.sh
-```
+To deploy Grafana with a Prometheus DataSource in OpenShift, follow [OpenShift observability hub: Grafana](../../observability-hub/grafana/README.md)
 
 You should now be able to access Grafana with `username: rhel` and `password:rhel` from the grafana route.
 
