@@ -1,7 +1,5 @@
 ## Send Telemetry from edge to OpenShift
 
-**WORK IN PROGRESS**
-
 Telemetry data from the edge (RH Device Edge, MicroShift, Single Node OpenShift) can be directed to OpenShift (OCP)
 eliminating the need for an expensive observability stack at the edge.
 
@@ -13,7 +11,7 @@ Follow this README to configure an observability hub in OpenShift.
 
 ### Hub OpenShift cluster
 
-This image shows the list of operators installed. These are available from OperatorHub.
+This image shows the list of operators installed. These are available from OperatorHub, or install via kustomize with the command below.
 
 ![Installed operators](../images/hub-installed-operators.png)
 
@@ -38,15 +36,15 @@ Thanos Receive can also be deployed as a sidecar to Prometheus, to enable a remo
 
 5. **Grafana Operator**: Provides Grafana APIs including `GrafanaDashboard`, `Grafana`, and `GrafanaDataSource` that will be used to visualize telemetry.
 
-#### Create custom resources and configurations for observability hub
+### Create custom resources and configurations for observability hub
 
-Metrics Backend (Prometheus with Thanos sidecar)
+#### Metrics Backend (Prometheus with Thanos sidecar)
 
 ```bash
 oc apply --kustomize observability-hub/prometheus
 ```
 
-Logging Backend (Loki with Minio container for s3 storage)
+#### Logging Backend (Loki with Minio container for s3 storage)
 
 ```bash
 # edit storageclassName & secret as necessary
@@ -54,7 +52,7 @@ Logging Backend (Loki with Minio container for s3 storage)
 oc apply --kustomize observability-hub/loki
 ```
 
-Tracing Backend (Tempo with Minio for S3 storage)
+#### Tracing Backend (Tempo with Minio for S3 storage)
 
 ```bash
 # edit storageclassName & secret as necessary
@@ -62,12 +60,22 @@ Tracing Backend (Tempo with Minio for S3 storage)
 oc apply --kustomize observability-hub/tempo
 ```
 
-OpenTelemetryCollector
+#### OpenTelemetryCollector
 
 ```bash
 # edit observability-hub/otel-collector/tls-otel-collector-route.yaml
 # to add correct base_domain
 oc apply --kustomize observability-hub/otel-collector
+```
+
+#### Grafana 
+
+This will deploy a Grafana operator in -n observability, a Grafana instance, and a Prometheus DataSource
+The Grafana console is configured with `username: rhel, password: rhel`
+
+```bash
+cd observability-hub/grafana
+./deploy-grafana.sh
 ```
 
 #### Copy opentelemetry endpoint to edge
