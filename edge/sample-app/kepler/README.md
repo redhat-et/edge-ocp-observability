@@ -52,7 +52,7 @@ oc apply --kustomize $(pwd)/manifests/config/base -n kepler
 # scp'd files from OpenShift are expected to be in $HOME on the edge system.
 
 ssh redhat@<RHEL_VM>
-ls ~/ca.crt ~/edge-token ~/otlp-endpoint
+ls ~/ca.crt ~/otlp-endpoint
 ```
 
 ### Launch OpenTelemetry Collector to receive and export kepler metrics
@@ -86,16 +86,21 @@ Finally, [deploy grafana in OpenShift with a prometheus datasource to view the m
 
 ### Deploy Grafana and the Prometheus DataSource with Kepler Dashboard
 
-You can query metrics from your application in OpenShift, `-n observability` with the `thanos-querier route`.
-However, you might prefer to view the prometheus metrics in Grafana with the upstream
+View the kepler-exporter prometheus metrics in Grafana with the upstream
 [kepler exporter dashboard](https://github.com/sustainable-computing-io/kepler/blob/main/grafana-dashboards/Kepler-Exporter.json)
 
-To deploy grafana, prometheus, and the dashboard, run this against the **OpenShift cluster**
+If there is already a Grafana instance with a Prometheus Datasource in OpenShift `-n observability`, run this command to
+create the GrafanaDashboard for Kepler:
 
 ```bash
-cd edge/sample-app/kepler/dashboard-example-kepler
-./deploy-grafana.sh
+oc apply -f edge-ocp-observability/edge/sample-app/kepler/kepler-dashboard.yaml
 ```
+
+If Grafana is not running in OpenShift,
+To deploy Grafana with a Prometheus DataSource in OpenShift, follow [OpenShift observability hub: Grafana](../../../observability-hub/grafana/README.md)
+Then, deploy the Kepler dashboard with the above command.
+
+You should now be able to access Grafana with `username: rhel` and `password:rhel` from the grafana route.
 
 You should now be able to access Grafana with `username: rhel` and `password:rhel` from the grafana route.
 
