@@ -46,7 +46,7 @@ oc apply --kustomize $(pwd)/manifests/config/base -n kepler
 # Check that kepler pod is up and running before proceeding
 ```
 
-#### Ensure OpenShift CA and token are on the edge system
+#### Ensure OpenShift CA and otel-collector endpoint on the edge system
 
 ```bash
 # scp'd files from OpenShift are expected to be in $HOME on the edge system.
@@ -68,33 +68,32 @@ Run the following to launch an OpenTelemetry Collector sidecar container in the 
 Download the opentelemetry config file and modify as necessary to configure receivers and exporters.
 
 ```bash
-# the exporter must be configured to match the OTLP receiver running in OpenShift
-curl -o microshift-otelconfig.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp-observability/main/edge/sample-app/kepler/microshift-otelconfig.yaml
-```
-
-
-```bash
 oc create configmap -n kepler client-ca --from-file ~/ca.crt
-oc create configmap -n kepler edge-token --from-file ~/edge-token
+
+curl -o microshift-otelconfig.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp-observability/main/edge/sample-app/kepler/microshift-otelconfig.yaml
+# the exporter must be configured to match the OTLP receiver running in OpenShift
+# replace <otlp_endpoint> with the OpenShift opentelemetry collector route.host
+
 oc create -n kepler -f microshift-otelconfig.yaml
 
 # patch daemonset to add a sidecar opentelemetry collector container
-oc patch daemonset kepler-exporter -n kepler --patch-file https://raw.githubusercontent.com/sallyom/microshift-observability/main/manifests/sample-instrumented-applications/kepler/patch-sidecar-otel.yaml
+curl -o /tmp/patch-sidecar-otel.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp-observability/main/edge/sample-app/kepler/patch-sidecar-otel.yaml
+oc patch daemonset kepler-exporter -n kepler --patch-file /tmp/patch-sidecar-otel.yaml
 ```
 
 Check that the kepler-exporter now includes an otc-container and that the collector is receiving and exporting metrics as expected.
 Finally, [deploy grafana in OpenShift with a prometheus datasource to view the metrics.](#deploy-grafana-and-the-prometheus-datasource-with-kepler-dashboard)
 
-### In OpenShift, deploy Grafana and the Prometheus DataSource with Kepler Dashboard
+### Deploy Grafana and the Prometheus DataSource with Kepler Dashboard
 
-You can query metrics from your application in OpenShift, `-n thanos` with the `thanos-querier route`.
+You can query metrics from your application in OpenShift, `-n observability` with the `thanos-querier route`.
 However, you might prefer to view the prometheus metrics in Grafana with the upstream
 [kepler exporter dashboard](https://github.com/sustainable-computing-io/kepler/blob/main/grafana-dashboards/Kepler-Exporter.json)
 
 To deploy grafana, prometheus, and the dashboard, run this against the **OpenShift cluster**
 
 ```bash
-cd microshift-observability/manifests/sample-instrumented-applications/kepler/dashboard-example-kepler
+cd edge/sample-app/kepler/dashboard-example-kepler
 ./deploy-grafana.sh
 ```
 

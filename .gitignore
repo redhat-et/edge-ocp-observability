@@ -1,0 +1,5 @@
+**/edge-token
+**/otlp-endpoint
+**/ca.crt
+**/private*
+**/.raw*

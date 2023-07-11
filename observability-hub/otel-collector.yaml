@@ -1,3 +1,10 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: otelcol
+  namespace: otelcol
+---
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
@@ -33,9 +40,11 @@ spec:
     requests:
       cpu: 50m
       memory: 50Mi
-  serviceAccount: otel-sa
+  serviceAccount: otelcol
   config: |
     extensions:
+      # Testing only
+      # TODO: replace
       basicauth:
         htpasswd:
           inline: |

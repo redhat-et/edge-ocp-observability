@@ -8,6 +8,11 @@ metadata:
 data:
   otelconfig.yaml: |
     extensions:
+      # TODO: replace basicauth
+      basicauth/client:
+        client_auth:
+          username: rhel
+          password: rhel
       bearertokenauth:
         filename: /conf/edge-token/edge-token
     receivers:
@@ -18,11 +23,10 @@ data:
       prometheus:
         config:
           scrape_configs:
-          - job_name: 'kepler-in-cluster'
-            scrape_interval: 5s
+          - job_name: 'kepler'
+            scrape_interval: 10s
             static_configs:
-             # any target listed must have a networkpolicy allowing opentelemetry collector access to metrics
-            - targets: ['127.0.0.1:9102'] # application metrics endpoint
+            - targets: ['localhost:9102'] # application metrics endpoint
     processors:
       memory_limiter:
         check_interval: 5s
@@ -31,17 +35,22 @@ data:
       batch:
     exporters:
       logging:
-        verbosity: detailed
-      prometheusremotewrite:
-        endpoint: https://thanos-receive-thanos.apps.open-svc-sts.k1wl.p1.openshiftapps.com/api/v1/receive
+        verbosity: info
+      otlphttp:
+        #endpoint: https://OCP_ROUTE_OTELCOL
+        endpoint: https://otlp-https.apps.open-svc-sts.k1wl.p1.openshiftapps.com # otel-collector service route from OCP, port 4318
         auth:
-          authenticator: bearertokenauth
+          authenticator: basicauth/client
         tls:
           insecure: false
           ca_file: /conf/ca/ca.crt
     service:
-      extensions: [bearertokenauth]
+      telemetry:
+        logs:
+          level: info
+      extensions: [basicauth/client]
+      #extensions: [bearertokenauth, basicauth/client]
       pipelines:
         metrics:
           receivers: [prometheus]
-          exporters: [prometheusremotewrite]
+          exporters: [prometheusremotewrite,otlphttp]

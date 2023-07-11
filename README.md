@@ -8,10 +8,9 @@ An overview of a typical edge observability created with this repository
 Included are the following observability scenarios:
 
 5. [Observability stack on OpenShift](observability-hub/README.md)
-2. [OpenTelemetry Operator at the edge](edge/opentelemetry-operator/README.md)
-2. [OpenTelemetry Collector no operator at the edge](edge/otel-collector-standalone/README.md)
 3. [MicroShift Kepler deployment to OpenShift observability stack](edge/sample-app/kepler/README.md)
 2. [Performance CoPilot (PCP) in RHEL Device Edge](./edge/edge-pcp-to-ocp/README.md)
+2. [OpenTelemetry Collector for Systemd logs, CRIO traces at the edge](edge/otel-collector-infra/README.md)
 3. [Sample Application with Traces](edge/sample-app/quarkus-superheroes/README.md)
 1. [Kubernetes Metrics Server on MicroShift](edge/metrics-server/README.md)
 

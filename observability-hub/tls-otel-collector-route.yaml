@@ -3,15 +3,14 @@ kind: Route
 metadata:
   labels:
     app.kubernetes.io/component: opentelemetry-collector
-    app.kubernetes.io/instance: summitdemo.ingest
+    app.kubernetes.io/instance: observability.ingest
     app.kubernetes.io/managed-by: opentelemetry-operator
-    app.kubernetes.io/name: otelcol-collector
     app.kubernetes.io/part-of: opentelemetry
-    app.kubernetes.io/version: 0.63.1
   name: tls-otel-collector
   namespace: observability
 spec:
-  host: otlp-https.apps.open-svc-sts.k1wl.p1.openshiftapps.com
+  # host: otlp-https.base_domain
+  host: otlp-https.apps.rosa.c5r9f-f95bg-org.cy1b.p3.openshiftapps.com
   port:
     targetPort: otlp-http
   tls:

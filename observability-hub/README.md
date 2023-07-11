@@ -9,6 +9,8 @@ The OpenTelemetry Collector (OTC) is well-suited for funneling telemetry from th
 OTC is also useful to simplify collection at the observability hub by providing a single exposed endpoint to
 receive all edge data, while at the edge a single connection can export all data.
 
+Follow this README to configure an observability hub in OpenShift.
+
 ### Hub OpenShift cluster
 
 This image shows the list of operators installed. These are available from OperatorHub.
@@ -66,7 +68,37 @@ oc apply -f tempostack.yaml -n observability
 OpenTelemetryCollector
 
 ```bash
-oc apply -f otelcol-cabundle.yaml
 oc apply -f otel-collector.yaml
+
+# edit to add correct base_domain
+oc apply -f tls-otel-collector-route.yaml
 ```
-**WORK IN PROGRESS**
+
+#### Copy opentelemetry endpoint to edge
+
+```bash
+oc -n observability get route tls-otel-collector -o jsonpath='{.status.ingress[*].host}' > ocp-otelcol-url
+
+# copy url to edge for configuring OTC exporter
+scp ocp-otelcol-url redhat@192.168.122.245:
+```
+
+#### Copy OpenShift root CA to edge for TLS
+
+```bash
+oc extract cm/kube-root-ca.crt -n openshift-config
+scp ca.crt redhat@192.168.122.245:
+```
+
+**TODO** replace basicAuth extension
+
+### Configure OTC at the edge to send data to observability hub
+
+Now that the observability stack is up and running, edge workloads can now send metrics, logs, and traces to the OTC in OpenShift.
+
+[Configure Performance Co-Pilot at the edge](../edge/edge-pcp-to-ocp/README.md)
+
+[Configure edge OTC to send Systemd logs and CRIO traces](../edge/otel-collector-infra/README.md)
+
+[Push MicroShift application metrics to OpenShift](../edge/sample-app/kepler/README.md)
+

@@ -1,0 +1,8 @@
+apiVersion: integreatly.org/v1alpha1
+kind: GrafanaDashboard
+metadata:
+  name: pcp-dashboard
+  labels:
+    app: grafana
+spec:
+  url: https://raw.githubusercontent.com/sallyom/microshift-observability/main/manifests/edge-pcp-to-ocp/dashboard-pcp-prometheus/dashboard/pcp-prom-host-overview.json
