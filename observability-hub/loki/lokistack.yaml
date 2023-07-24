@@ -14,5 +14,4 @@ spec:
       name: minio-loki
       type: s3
   storageClassName: gp3-csi
-  tenants:
-    mode: openshift-logging
+  auth_enabled: false

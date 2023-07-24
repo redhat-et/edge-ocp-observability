@@ -38,6 +38,12 @@ Thanos Receive can also be deployed as a sidecar to Prometheus, to enable a remo
 
 ### Create custom resources and configurations for observability hub
 
+Create the observablity hub namespace `observability`. If a different namespace is created, be sure to update the resource yamls accordingly.
+
+```bash
+oc create ns observability
+```
+
 #### Metrics Backend (Prometheus with Thanos sidecar)
 
 ```bash

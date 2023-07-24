@@ -3,10 +3,10 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
   name: loki-operator
-  namespace: openshift-operators-redhat
+  namespace: openshift-operators
 spec:
   channel: stable
   name: loki-operator
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: loki-operator.v5.7.2
+  startingCSV: loki-operator.v5.7.3

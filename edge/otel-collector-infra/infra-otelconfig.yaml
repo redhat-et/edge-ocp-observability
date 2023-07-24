@@ -15,9 +15,9 @@ receivers:
     directory: /var/log/journal/
     units:
       - ssh
-      - microshift
-      - ovn-kubernetes
-      - crio
+      #- microshift
+      #- ovn-kubernetes
+      #- crio
     priority: info
   otlp:
     protocols:
@@ -26,10 +26,14 @@ receivers:
   prometheus:
     config:
       scrape_configs:
+      - job_name: 'kepler-local'
+        scrape_interval: 5s
+        static_configs:
+        - targets: ['127.0.0.1:8888'] # kepler as host systemd service
       - job_name: 'pmproxy-rhedge'
         scrape_interval: 5s
         static_configs:
-        - targets: ['0.0.0.0:44322'] # instrumented app endpoint
+        - targets: ['0.0.0.0:44322'] # pcp
 
 processors:
   batch:
@@ -39,8 +43,8 @@ processors:
     spike_limit_percentage: 25
 exporters:
   otlphttp:
-    # endpoint: https://otlp-https.<base_domain>
-    endpoint: https://otlp-https.apps.open-svc-sts.k1wl.p1.openshiftapps.com
+    endpoint: https://otlp-https.<base_domain>
+    #endpoint: https://otlp-https.apps.open-svc-sts.k1wl.p1.openshiftapps.com
     auth:
       authenticator: basicauth/client
     headers:
