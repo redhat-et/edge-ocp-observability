@@ -1,0 +1,12 @@
+sudo podman run --rm -d --name otelcol-host \
+  --network=host \
+  --user=0 \
+  --security-opt label=disable \
+  --cap-add SYS_ADMIN \
+  --tmpfs /tmp --tmpfs /run  \
+  -v /var/log/:/var/log  \
+  -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+  -v $(pwd)/ca.crt:/conf/ca.crt:Z \
+  -v $(pwd)/otelcol-config.yaml:/etc/otelcol-contrib/config.yaml:Z \
+  -v $(pwd)/otc:/otc:Z  \
+  quay.io/sallyom/ubi8-otelcolcontrib:latest --config=file:/etc/otelcol-contrib/config.yaml

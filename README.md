@@ -9,6 +9,7 @@ Included are the following observability scenarios:
 
 1. [Observability stack on OpenShift](observability-hub/README.md)
 3. [MicroShift Kepler deployment to OpenShift observability stack](edge/sample-app/kepler/README.md)
+3. [Kepler RPM (non-K8s) metrics to OpenShift observability stack](edge/sample-app/kepler/kepler-rpm-host.md)
 2. [Performance CoPilot (PCP) in RHEL Device Edge](./edge/edge-pcp-to-ocp/README.md)
 2. [OpenTelemetry Collector for Systemd logs, CRIO traces at the edge](edge/otel-collector-infra/README.md)
 3. [Sample Application with Traces](edge/sample-app/quarkus-superheroes/README.md)
