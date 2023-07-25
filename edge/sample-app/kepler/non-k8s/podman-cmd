@@ -8,5 +8,4 @@ sudo podman run --rm -d --name otelcol-host \
   -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
   -v $(pwd)/ca.crt:/conf/ca.crt:Z \
   -v $(pwd)/otelcol-config.yaml:/etc/otelcol-contrib/config.yaml:Z \
-  -v $(pwd)/otc:/otc:Z  \
   quay.io/sallyom/ubi8-otelcolcontrib:latest --config=file:/etc/otelcol-contrib/config.yaml
