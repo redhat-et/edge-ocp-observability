@@ -48,6 +48,14 @@ oc apply --kustomize $(pwd)/manifests/config/base -n kepler
 
 #### Ensure OpenShift CA and otel-collector endpoint on the edge system
 
+If necessary, obtain `ca.crt` OpenShift root CA by extracting the secret from the OpenShift cluster.
+The `otlp endpoint` can be found from the tls-otelcollector route in the OpenShift cluster.
+
+```base
+oc extract cm/kube-root-ca.crt -n openshift-config
+scp ca.crt user@ip-address-edge-device:
+```
+
 ```bash
 # scp'd files from OpenShift are expected to be in $HOME on the edge system.
 
