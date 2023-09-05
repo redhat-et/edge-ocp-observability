@@ -9,4 +9,4 @@ spec:
   name: loki-operator
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: loki-operator.v5.7.3
+  startingCSV: loki-operator.v5.7.5
