@@ -52,7 +52,7 @@ sudo podman run --rm -d --name otelcol-host \
   -v $(pwd)/ca.crt:/conf/ca.crt:z \
   -v $(pwd)/otelcol-config.yaml:/etc/otelcol-contrib/config.yaml:z \
   -v $(pwd)/otc:/otc:z  \
-  quay.io/sallyom/ubi8-otelcolcontrib:latest --config=file:/etc/otelcol-contrib/config.yaml
+  quay.io/sallyom/otelcolcontrib:ubi9 --config=file:/etc/otelcol-contrib/config.yaml
 ```
 
 #### Deploy Grafana and the Prometheus DataSource with PCP Prometheus Host Overview Dashboard
