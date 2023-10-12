@@ -6,4 +6,3 @@ resources:
 - serviceaccount.yaml
 - otelcol-cabundle.yaml
 - otel-collector.yaml
-- tls-otel-collector-route.yaml

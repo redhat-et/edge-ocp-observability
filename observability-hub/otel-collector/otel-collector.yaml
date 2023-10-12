@@ -7,7 +7,7 @@ metadata:
 spec:
   mode: statefulset
   replicas: 1
-  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.84.0
+  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.86.0
   volumeMounts:
   - name: cabundle-volume
     mountPath: /etc/pki/ca-trust/source/service-ca
@@ -35,14 +35,12 @@ spec:
       cpu: 50m
       memory: 50Mi
   serviceAccount: otelcol
+  ingress:
+    type: route
+    route:
+      termination: "passthrough"
   config: |
     extensions:
-      # Testing only
-      # TODO: replace
-      basicauth:
-        htpasswd:
-          inline: |
-            rhel:rhel
       bearertokenauth:
         scheme: "Bearer"
         filename: "/var/run/secrets/kubernetes.io/serviceaccount/token"
@@ -56,11 +54,15 @@ spec:
       otlp:
         protocols:
           grpc:
-            auth:
-              authenticator: basicauth
+            tls: # TODO
+              cert_file: /path/to/server/cert.pem
+              key_file: /path/to/server/key.pem
+              client_ca_file: /path/to/client/ca.pem
           http:
-            auth:
-              authenticator: basicauth
+            tls: # TODO
+              cert_file: /path/to/server/cert.pem
+              key_file: /path/to/server/key.pem
+              client_ca_file: /path/to/client/ca.pem
       # Collect own metrics
       # prometheus:
       #   config:
@@ -76,7 +78,7 @@ spec:
         limit_percentage: 80
         spike_limit_percentage: 25
     exporters:
-      logging:
+      debug:
         verbosity: detailed
       loki:
         endpoint: https://lokistack-gateway-http.observability.svc.cluster.local:8080/api/logs/v1/application/loki/api/v1/push
@@ -88,6 +90,7 @@ spec:
         endpoint: http://sample-monitoring-stack-prometheus.observability.svc.cluster.local:9090/api/v1/write
         tls:
           insecure: true
+          # TODO: enable TLS
           #ca_file: "/etc/pki/ca-trust/source/service-ca/service-ca.crt"
 
       otlp/traces:
@@ -99,8 +102,7 @@ spec:
         tls:
           ca_file: "/etc/pki/ca-trust/source/service-ca/service-ca.crt"
     service:
-      # extensions: [memory_ballast, basicauth, file_storage/traces]
-      extensions: [basicauth,bearertokenauth]
+      extensions: [bearertokenauth, file_storage/traces]
       pipelines:
         traces:
           receivers: [otlp]
