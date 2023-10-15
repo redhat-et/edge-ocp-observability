@@ -1,11 +1,4 @@
 extensions:
-  #bearertokenauth:
-    #filename: /conf/edge-token
-  # TODO: replace basicauth
-  basicauth/client:
-    client_auth:
-      username: rhel
-      password: rhel
   file_storage:
     # this dir must exist on filesystem where otelcollector is running
     directory: /otc
@@ -43,21 +36,22 @@ processors:
     spike_limit_percentage: 25
 exporters:
   otlphttp:
-    endpoint: https://otlp-https.<base_domain>
+    endpoint: https://otc.$APPS_DOMAIN
     #endpoint: https://otlp-https.apps.open-svc-sts.k1wl.p1.openshiftapps.com
-    auth:
-      authenticator: basicauth/client
     headers:
       x-scope-orgid: "infrastructure"
     tls:
+      # For mTLS see the observability-hub/mtls
       insecure: false
-      ca_file: /conf/ca.crt
+      cert_file: /conf/client.cert.pem
+      key_file: /conf/client.key.pem
+      ca_file: /conf/server.cert.pem
     sending_queue:
       storage: file_storage
   logging:
     verbosity: detailed
 service:
-  extensions: [file_storage,basicauth/client]
+  extensions: [file_storage]
   telemetry:
     metrics:
       level: detailed

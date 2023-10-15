@@ -66,11 +66,22 @@ oc apply --kustomize observability-hub/loki
 oc apply --kustomize observability-hub/tempo
 ```
 
-#### OpenTelemetryCollector
+#### Prepare mTLS certificates and keys in both the edge and OpenShift
+
+To secure traffic from external OpenTelemetry Collector (OTC) to OpenShift OTC,
+follow the [mTLS documentation](./mtls/mTLS-otel-collectors.md). This will create a CA and
+signed certificates for both the server (OpenShift OTC) and client (edge/external OTC).
+This document also specifies the configmaps to create in the observability namespace that are 
+mounted in OpenShift OTC deployment below. 
+
+#### OpenTelemetryCollector deployment
+
+Notice the otel-collector manifests assume the `clientca` and `tls-otelcol` configmaps exist from
+the above mTLS section.
 
 ```bash
-# edit observability-hub/otel-collector/tls-otel-collector-route.yaml
-# to add correct base_domain
+APPS_DOMAIN="apps.$(oc get dns cluster -o jsonpath='{ .spec.baseDomain }')"
+# edit observability-hub/otel-collector/tls-otel-collector-route.yaml with $APPS_DOMAIN. 
 oc apply --kustomize observability-hub/otel-collector
 ```
 
@@ -84,24 +95,6 @@ cd observability-hub/grafana
 ./deploy-grafana.sh
 ```
 
-#### Copy opentelemetry endpoint to edge
-
-```bash
-oc -n observability get route tls-otel-collector -o jsonpath='{.status.ingress[*].host}' > otlp-endpoint
-
-# copy url to edge for configuring OTC exporter
-scp otlp-endpoint redhat@192.168.122.245:
-```
-
-#### Copy OpenShift root CA to edge for TLS
-
-```bash
-oc extract cm/kube-root-ca.crt -n openshift-config
-scp ca.crt redhat@192.168.122.245:
-```
-
-**TODO** replace basicAuth extension
-
 ### Configure OTC at the edge to send data to observability hub
 
 Now that the observability stack is up and running, edge workloads can now send metrics, logs, and traces to the OTC in OpenShift.
@@ -110,7 +103,7 @@ Now that the observability stack is up and running, edge workloads can now send 
 
 [Configure edge OTC to send Systemd logs and CRIO traces](../edge/otel-collector-infra/README.md)
 
-[Push MicroShift application (Kepler)  metrics to OpenShift observability stack](../edge/sample-app/kepler/README.md)
-
 [Push Kepler metrics from host to OpenShift observability stack](../edge/sample-app/kepler/kepler-rpm-host.md)
+
+[Push MicroShift application (Kepler)  metrics to OpenShift observability stack](../edge/sample-app/kepler/README.md)
 

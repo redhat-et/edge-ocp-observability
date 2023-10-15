@@ -11,7 +11,7 @@ SSH into the virtual machine.
 sudo systemctl enable --now microshift
 mkdir ~/.kube
 sudo cp /var/lib/microshift/resources/kubeadmin/kubeconfig ~/.kube/config
-sudo chown -R redhat:redhat ~/.kube
+sudo chown -R $UID:$UID ~/.kube
 oc get pods -A # all pods should soon be running
 ```
 
@@ -46,22 +46,13 @@ oc apply --kustomize $(pwd)/manifests/config/base -n kepler
 # Check that kepler pod is up and running before proceeding
 ```
 
-#### Ensure OpenShift CA and otel-collector endpoint on the edge system
+#### Prepare mTLS certificates and keys in MicroShift and OpenShift
 
-If necessary, obtain `ca.crt` OpenShift root CA by extracting the secret from the OpenShift cluster.
-The `otlp endpoint` can be found from the tls-otelcollector route in the OpenShift cluster.
-
-```base
-oc extract cm/kube-root-ca.crt -n openshift-config
-scp ca.crt user@ip-address-edge-device:
-```
-
-```bash
-# scp'd files from OpenShift are expected to be in $HOME on the edge system.
-
-ssh redhat@<RHEL_VM>
-ls ~/ca.crt ~/otlp-endpoint
-```
+To secure traffic from external OpenTelemetry Collector (OTC) to OpenShift OTC,
+follow the [mTLS documentation](./mtls/mTLS-otel-collectors.md). This will create a CA and
+signed certificates for both the server (OpenShift OTC) and client (edge/MicroShift OTC).
+This document also specifies the configmaps to create in the OpenShift observability namespace that are 
+mounted in OpenShift OTC deployment. 
 
 ### Launch OpenTelemetry Collector to receive and export kepler metrics
 
@@ -76,11 +67,12 @@ Run the following to launch an OpenTelemetry Collector sidecar container in the 
 Download the opentelemetry config file and modify as necessary to configure receivers and exporters.
 
 ```bash
-oc create configmap -n kepler client-ca --from-file ~/ca.crt
+oc create configmap -n kepler clientca --from-file observability-hub/mtls/certs/cacert.pem
+oc create configmap tls-otelcol --from-file certs/client.cert.pem --from-file private/client.key.pem -n observability
 
 curl -o microshift-otelconfig.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp-observability/main/edge/sample-app/kepler/microshift-otelconfig.yaml
 # the exporter must be configured to match the OTLP receiver running in OpenShift
-# replace <otlp_endpoint> with the OpenShift opentelemetry collector route.host
+# replace $APPS_DOMAIN
 
 oc create -n kepler -f microshift-otelconfig.yaml
 
