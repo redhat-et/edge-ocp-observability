@@ -15,14 +15,13 @@ On the edge device, an OpenTelemetryCollector pod can scrape PCP metrics and pus
 
 ## Send PCP metrics from RHEL machine to OpenShift
 
-#### Ensure OpenShift CA and OpenShift OpenTelemetry Collector endpoint are on the edge system
+### Prepare mTLS certificates and keys in both the edge and OpenShift
 
-```bash
-# scp'd files from OpenShift are expected to be in $HOME on the edge system.
-
-ssh redhat@<RHEL_VM>
-ls ~/ca.crt ~/otlp-endpoint
-```
+To secure traffic from external OpenTelemetry Collector (OTC) to OpenShift OTC,
+follow the [mTLS documentation](./mtls/mTLS-otel-collectors.md). This will create a CA and
+signed certificates for both the server (OpenShift OTC) and client (edge/external OTC).
+This document also specifies the configmaps to create in the observability namespace that are 
+mounted in OpenShift OTC deployment below. 
 
 ### RHEL machine
 
@@ -32,26 +31,28 @@ ls ~/ca.crt ~/otlp-endpoint
 curl -o otelcol-config.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp-observability/main/edge/edge-pcp-to-ocp/otelcol-config.yaml
 ```
 
-Copy contents of `otlp-endpoint` to [otelcol-config.yaml](./otelcol-config.yaml).
+Substitute for `$APPS_DOMAIN` in [otelcol-config.yaml](./otelcol-config.yaml) to configure the OpenShift OTC endpoint.
 
 #### Run OpenTelemetry Collector with podman
 
 ```bash
 mkdir otc # for file-storage extension, if configured
 
-# Note the ca.crt must exist at $(pwd)/.
+# Note the mtls directory must exist at $(pwd)/.
 
-sudo podman run --rm -d --name otelcol-host \
+sudo podman run -d --rm --name otelcol-host \
   --network=host \
+  --user=0 \
   --security-opt label=disable \
-  --user=0  \
   --cap-add SYS_ADMIN \
   --tmpfs /tmp --tmpfs /run  \
   -v /var/log/:/var/log  \
   -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
-  -v $(pwd)/ca.crt:/conf/ca.crt:z \
-  -v $(pwd)/otelcol-config.yaml:/etc/otelcol-contrib/config.yaml:z \
-  -v $(pwd)/otc:/otc:z  \
+  -v $(pwd)/mtls/certs/server.cert.pem:/conf/server.cert.pem:Z \
+  -v $(pwd)/mtls/certs/client.cert.pem:/conf/client.cert.pem:Z \
+  -v $(pwd)/mtls/private/client.key.pem:/conf/client.key.pem:Z \
+  -v $(pwd)/otelcol-config.yaml:/etc/otelcol-contrib/config.yaml:Z \
+  -v $(pwd)/otc:/otc:Z  \
   quay.io/sallyom/otelcolcontrib:ubi9 --config=file:/etc/otelcol-contrib/config.yaml
 ```
 

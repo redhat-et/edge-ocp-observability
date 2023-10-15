@@ -36,15 +36,16 @@ processors:
     spike_limit_percentage: 25
 exporters:
   otlphttp:
-    endpoint: https://otlp-https.<base_domain>
+    endpoint: https://otc.$APPS_DOMAIN
     #endpoint: https://otlp-https.apps.open-svc-sts.k1wl.p1.openshiftapps.com
     headers:
       x-scope-orgid: "infrastructure"
     tls:
-      insecure: false # TODO
-      cert_file: "/path/to/server-cert.pem"
-      key_file: "/path/to/server-key.pem"
-      client_ca_file: "/path/to/client-ca.pem"
+      # For mTLS see the observability-hub/mtls
+      insecure: false
+      cert_file: /conf/client.cert.pem
+      key_file: /conf/client.key.pem
+      ca_file: /conf/server.cert.pem
     sending_queue:
       storage: file_storage
   logging:

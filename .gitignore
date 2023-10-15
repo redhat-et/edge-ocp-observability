@@ -1,5 +1,8 @@
 **/edge-token
 **/otlp-endpoint
 **/ca.crt
+**/certs*
 **/private*
 **/.raw*
+**/*.pem
+**/openssl.cnf

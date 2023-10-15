@@ -1,3 +1,5 @@
+# TODO: FIX
+# This is currently broken, must update for mTLS
 ---
 spec:
   template:
@@ -7,8 +9,8 @@ spec:
           name: otelcol
         name: otelconfig
       - configMap:
-          name: client-ca
-        name: client-ca
+          name: clientca
+        name: clientca
       #- configMap:
       #    name: edge-token
       #  name: edge-token
@@ -20,7 +22,7 @@ spec:
         imagePullPolicy: IfNotPresent
         args:
           - "--config=/conf/config/otelconfig.yaml"
-        image: quay.io/sallyom/ubi8-otelcolcontrib:latest
+        image: quay.io/sallyom/otelcolcontrib:ubi9
         resources:
           limits:
             cpu: 200m
@@ -30,7 +32,7 @@ spec:
             memory: 200Mi
         volumeMounts:
         - mountPath: /conf/ca
-          name: client-ca
+          name: clientca
         #- mountPath: /conf/edge-token
         #  name: edge-token
         - mountPath: /conf/config

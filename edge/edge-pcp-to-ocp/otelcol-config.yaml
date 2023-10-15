@@ -1,11 +1,3 @@
-extensions:
-  # TODO: replace basicauth
-  basicauth/client:
-    client_auth:
-      username: rhel
-      password: rhel
-  # bearertokenauth:
-  #   filename: /conf/edge-token
 receivers:
   prometheus:
     config:
@@ -23,17 +15,17 @@ processors:
 exporters:
   otlphttp:
     #endpoint: https://OCP_ROUTE_OTELCOL
-    endpoint: https://otlp-https.apps.open-svc-sts.k1wl.p1.openshiftapps.com # otel-collector service route from OCP, port 4318
-    auth:
-      authenticator: basicauth/client
+    endpoint: https://otc.${APPS_DOMAIN} # otel-collector service route from OCP, port 4318
     tls:
       insecure: false
-      ca_file: /conf/ca.crt
+      cert_file: /conf/client.cert.pem
+      key_file: /conf/client.key.pem
+      ca_file: /conf/server.cert.pem
   logging:
     verbosity: detailed
 service:
   #extensions: [bearertokenauth]
-  extensions: [basicauth/client]
+  #extensions: [basicauth/client]
   telemetry:
     metrics:
       level: detailed

@@ -5,4 +5,7 @@ namespace: observability
 resources:
 - serviceaccount.yaml
 - otelcol-cabundle.yaml
+# mTLS configmaps clientca & tls-otelcol must exist before applying
 - otel-collector.yaml
+# Must replace $APPS_DOMAIN in route manifest before applying
+- otel-collector-route.yaml

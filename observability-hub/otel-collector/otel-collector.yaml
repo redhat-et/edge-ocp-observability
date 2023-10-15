@@ -9,12 +9,24 @@ spec:
   replicas: 1
   image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.86.0
   volumeMounts:
+  - name: clientca
+    mountPath: /etc/pki/ca-trust/source/client-ca
+    readOnly: true
+  - name: tls-otelcol
+    mountPath: /tls
+    readOnly: true
   - name: cabundle-volume
     mountPath: /etc/pki/ca-trust/source/service-ca
     readOnly: true
   - name: wal
     mountPath: /usr/share/wal
   volumes:
+  - name: tls-otelcol
+    configMap:
+      name: tls-otelcol
+  - name: clientca
+    configMap:
+      name: clientca
   - name: cabundle-volume
     configMap:
       name: otelcol-cabundle
@@ -35,10 +47,9 @@ spec:
       cpu: 50m
       memory: 50Mi
   serviceAccount: otelcol
-  ingress:
-    type: route
-    route:
-      termination: "passthrough"
+  #ingress:
+  #  annotations:
+  #    route.openshift.io/termination: "passthrough"
   config: |
     extensions:
       bearertokenauth:
@@ -55,14 +66,14 @@ spec:
         protocols:
           grpc:
             tls: # TODO
-              cert_file: /path/to/server/cert.pem
-              key_file: /path/to/server/key.pem
-              client_ca_file: /path/to/client/ca.pem
+              cert_file: /tls/server.cert.pem
+              key_file: /tls/server.key.pem
+              client_ca_file: /etc/pki/ca-trust/source/client-ca/cacert.pem
           http:
             tls: # TODO
-              cert_file: /path/to/server/cert.pem
-              key_file: /path/to/server/key.pem
-              client_ca_file: /path/to/client/ca.pem
+              cert_file: /tls/server.cert.pem
+              key_file: /tls/server.key.pem
+              client_ca_file: /etc/pki/ca-trust/source/client-ca/cacert.pem
       # Collect own metrics
       # prometheus:
       #   config:

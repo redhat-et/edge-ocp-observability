@@ -1,0 +1,16 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: otel-collector-grpc
+  namespace: observability
+spec:
+  host: otc-grpc.apps.rosa.h332b-c4jjq-2sh.vjy8.p3.openshiftapps.com
+  port:
+    targetPort: otlp-grpc
+  tls:
+    termination: passthrough
+  to:
+    kind: Service
+    name: ingest-collector-headless
+    weight: 100
+  wildcardPolicy: None
