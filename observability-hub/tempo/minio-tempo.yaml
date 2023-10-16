@@ -10,7 +10,6 @@ spec:
       app.kubernetes.io/name: minio-tempo
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app.kubernetes.io/name: minio-tempo
     spec:
@@ -20,7 +19,6 @@ spec:
             claimName: minio-tempo
       containers:
         - resources: {}
-          terminationMessagePath: /dev/termination-log
           name: minio-tempo
           command:
             - /bin/sh
@@ -40,13 +38,10 @@ spec:
           volumeMounts:
             - name: storage
               mountPath: /storage
-          terminationMessagePolicy: File
           image: quay.io/minio/minio
       restartPolicy: Always
-      terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst
       securityContext: {}
-      schedulerName: default-scheduler
   strategy:
     type: Recreate
   progressDeadlineSeconds: 600

@@ -1,22 +1,20 @@
-# TODO: FIX
-# This is currently broken, must update for mTLS
 ---
 spec:
   template:
     spec:
       volumes:
       - configMap:
+          name: tls-otelcol
+        name: tls-otelcol
+      - configMap:
           name: otelcol
         name: otelconfig
       - configMap:
+          name: server-cert
+        name: server-cert
+      - configMap:
           name: clientca
         name: clientca
-      #- configMap:
-      #    name: edge-token
-      #  name: edge-token
-      - configMap:
-          name: otelcol-cabundle
-        name: cabundle-volume
       containers:
       - name: otc-container
         imagePullPolicy: IfNotPresent
@@ -31,11 +29,12 @@ spec:
             cpu: 100m
             memory: 200Mi
         volumeMounts:
-        - mountPath: /conf/ca
+        - mountPath: /conf/tls
+          name: tls-otelcol
+        - mountPath: /conf
+          name: server-cert
+        - mountPath: /etc/pki/ca-trust/source/clientca
           name: clientca
-        #- mountPath: /conf/edge-token
-        #  name: edge-token
         - mountPath: /conf/config
           name: otelconfig
-        - mountPath: /etc/pki/ca-trust/source/service-ca
-          name: cabundle-volume
+

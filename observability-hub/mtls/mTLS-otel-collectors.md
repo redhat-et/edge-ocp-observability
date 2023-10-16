@@ -9,6 +9,7 @@ is created at the edge. Traffic will be secured from edge OTC to OpenShift hub O
 This assumes you are in mtls directory of this repository:
 
 ```bash
+mkdir mtls && cd mtls
 mkdir certs private
 ```
 

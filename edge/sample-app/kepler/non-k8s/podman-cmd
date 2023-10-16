@@ -1,4 +1,4 @@
-sudo podman run --rm --name otelcol-host \
+sudo podman run -d --rm --name otelcol-host \
   --network=host \
   --user=0 \
   --security-opt label=disable \

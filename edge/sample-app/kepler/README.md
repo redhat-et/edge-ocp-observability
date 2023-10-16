@@ -67,8 +67,8 @@ Run the following to launch an OpenTelemetry Collector sidecar container in the 
 Download the opentelemetry config file and modify as necessary to configure receivers and exporters.
 
 ```bash
-oc create configmap -n kepler clientca --from-file observability-hub/mtls/certs/cacert.pem
-oc create configmap tls-otelcol --from-file certs/client.cert.pem --from-file private/client.key.pem -n observability
+oc create configmap -n kepler clientca --from-file ~/mtls/certs/cacert.pem
+oc create configmap tls-otelcol --from-file ~/mtls/certs/client.cert.pem --from-file ~/mtls/private/client.key.pem -n kepler
 
 curl -o microshift-otelconfig.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp-observability/main/edge/sample-app/kepler/microshift-otelconfig.yaml
 # the exporter must be configured to match the OTLP receiver running in OpenShift

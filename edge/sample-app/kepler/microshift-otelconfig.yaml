@@ -2,14 +2,6 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  annotations:
-    service.beta.openshift.io/inject-cabundle: "true"
-  name: otelcol-cabundle
-  namespace: kepler
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   namespace: kepler
   name: otelcol
   labels:
@@ -39,11 +31,11 @@ data:
         verbosity: detailed
       otlphttp:
         #endpoint: https://OCP_ROUTE_OTELCOL
-        endpoint: https://otc.$APPS_DOMAIN # otel-collector service route from OCP, port 4318
+        endpoint: https://otc.apps.open-svc-sts.k1wl.p1.openshiftapps.com # otel-collector service route from OCP, port 4318
         tls:
           insecure: false
-          cert_file: /conf/client.cert.pem
-          key_file: /conf/client.key.pem
+          cert_file: /conf/tls/client.cert.pem
+          key_file: /conf/tls/client.key.pem
           ca_file: /conf/server.cert.pem
     service:
       telemetry:
@@ -54,3 +46,4 @@ data:
         metrics:
           receivers: [prometheus]
           exporters: [otlphttp]
+

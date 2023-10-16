@@ -6,3 +6,6 @@
 **/.raw*
 **/*.pem
 **/openssl.cnf
+**/index*
+**/serial
+**/mtls*

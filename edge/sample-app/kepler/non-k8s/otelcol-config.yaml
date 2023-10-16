@@ -1,12 +1,17 @@
 extensions:
-  # TODO: replace basicauth
-  basicauth/client:
-    client_auth:
-      username: rhel
-      password: rhel
-  # bearertokenauth:
-  #   filename: /conf/edge-token
+  file_storage:
+    # this dir must exist on filesystem where otelcollector is running
+    directory: /otc
+    timeout: 10s
 receivers:
+  journald:
+    directory: /var/log/journal/
+    units:
+      - kepler
+      #- microshift
+      #- ovn-kubernetes
+      #- crio
+    priority: info
   prometheus:
     config:
       scrape_configs:
@@ -22,17 +27,17 @@ processors:
     spike_limit_percentage: 25
 exporters:
   otlphttp:
-    endpoint: https://OTEL_COLLECTOR_ROUTE
-    auth:
-      authenticator: basicauth/client
+    #endpoint: https://OCP_ROUTE_OTELCOL
+    endpoint: https://otc.apps.open-svc-sts.k1wl.p1.openshiftapps.com
     tls:
       insecure: false
-      ca_file: /conf/ca.crt
+      cert_file: /conf/client.cert.pem
+      key_file: /conf/client.key.pem
+      ca_file: /conf/server.cert.pem
   logging:
     verbosity: detailed
 service:
-  #extensions: [bearertokenauth]
-  extensions: [basicauth/client]
+  extensions: [file_storage]
   telemetry:
     metrics:
       level: detailed
