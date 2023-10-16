@@ -4,6 +4,18 @@ extensions:
     directory: /otc
     timeout: 10s
 receivers:
+  hostmetrics:
+    root_path: /hostfs
+    collection_interval: 10s
+    scrapers:
+      cpu:
+      memory:
+  hostmetrics/disk:
+    root_path: /hostfs
+    collection_interval: 30s
+    scrapers:
+      disk:
+      filesystem:
   journald:
     directory: /var/log/journal/
     units:
@@ -23,10 +35,10 @@ receivers:
         scrape_interval: 5s
         static_configs:
         - targets: ['127.0.0.1:8888'] # kepler as host systemd service
-      - job_name: 'pmproxy-rhedge'
-        scrape_interval: 5s
-        static_configs:
-        - targets: ['0.0.0.0:44322'] # pcp
+      #- job_name: 'pmproxy-rhedge'
+      #  scrape_interval: 5s
+      #  static_configs:
+      #  - targets: ['0.0.0.0:44322'] # pcp
 
 processors:
   batch:
@@ -36,8 +48,8 @@ processors:
     spike_limit_percentage: 25
 exporters:
   otlphttp:
-    endpoint: https://otc.$APPS_DOMAIN
-    #endpoint: https://otlp-https.apps.open-svc-sts.k1wl.p1.openshiftapps.com
+    #endpoint: https://otc.$APPS_DOMAIN
+    endpoint: https://otc.apps.open-svc-sts.k1wl.p1.openshiftapps.com
     headers:
       x-scope-orgid: "infrastructure"
     tls:
@@ -58,7 +70,7 @@ service:
       address: 0.0.0.0:8887
   pipelines:
     metrics:
-      receivers: [prometheus]
+      receivers: [prometheus,hostmetrics,hostmetrics/disk]
       exporters: [otlphttp]
     traces:
       receivers: [otlp]
