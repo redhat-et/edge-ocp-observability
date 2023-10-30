@@ -1,7 +1,4 @@
-FROM alpine:latest as prep
-RUN apk --update add ca-certificates
-
-FROM otel/opentelemetry-collector-contrib:0.84.0 as builder
+FROM otel/opentelemetry-collector-contrib:latest as builder
 
 FROM ubi9
 COPY --from=builder /otelcol-contrib /
