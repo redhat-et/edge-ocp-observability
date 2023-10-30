@@ -43,7 +43,6 @@ mkdir otc # for file-storage extension, if configured
 sudo podman run -d --rm --name otelcol-host \
   --network=host \
   --user=0 \
-  --security-opt label=disable \
   --cap-add SYS_ADMIN \
   --tmpfs /tmp --tmpfs /run  \
   -v /var/log/:/var/log  \

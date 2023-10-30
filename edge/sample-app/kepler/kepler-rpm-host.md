@@ -44,7 +44,6 @@ In the future, the privilege required to run Kepler can be fine-tuned.
 sudo podman run --rm --name otelcol-host \
   --network=host \
   --user=0 \
-  --security-opt label=disable \
   --cap-add SYS_ADMIN \
   --tmpfs /tmp --tmpfs /run  \
   -v /var/log/:/var/log  \

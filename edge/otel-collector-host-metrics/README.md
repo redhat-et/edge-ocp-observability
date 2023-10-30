@@ -62,11 +62,11 @@ mkdir otc # for file-storage extension, if configured
 sudo podman run -d --rm --name otelcol-host \
   --network=host \
   --user=0 \
-  --security-opt label=disable \
   --cap-add SYS_ADMIN \
   --tmpfs /tmp --tmpfs /run  \
   -v /var/log/:/var/log  \
   -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+  -v /:/hostfs:ro \
   -v $(pwd)/mtls/certs/server.cert.pem:/conf/server.cert.pem:Z \
   -v $(pwd)/mtls/certs/client.cert.pem:/conf/client.cert.pem:Z \
   -v $(pwd)/mtls/private/client.key.pem:/conf/client.key.pem:Z \
