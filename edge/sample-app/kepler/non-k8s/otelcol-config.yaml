@@ -27,8 +27,8 @@ processors:
     spike_limit_percentage: 25
 exporters:
   otlphttp:
-    #endpoint: https://OCP_ROUTE_OTELCOL
-    endpoint: https://otc.apps.open-svc-sts.k1wl.p1.openshiftapps.com
+    endpoint: https://OCP_ROUTE_OTELCOL
+    #endpoint: https://otc.apps.open-svc-sts.k1wl.p1.openshiftapps.com
     tls:
       insecure: false
       cert_file: /conf/client.cert.pem

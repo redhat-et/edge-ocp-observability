@@ -30,8 +30,8 @@ data:
       logging:
         verbosity: detailed
       otlphttp:
-        #endpoint: https://OCP_ROUTE_OTELCOL
-        endpoint: https://otc.apps.open-svc-sts.k1wl.p1.openshiftapps.com # otel-collector service route from OCP, port 4318
+        endpoint: https://otc.$APPS_DOMAIN
+        #endpoint: https://otc.apps.open-svc-sts.k1wl.p1.openshiftapps.com # otel-collector service route from OCP, port 4318
         tls:
           insecure: false
           cert_file: /conf/tls/client.cert.pem

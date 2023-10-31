@@ -4,14 +4,14 @@ spec:
     spec:
       volumes:
       - configMap:
+          name: server-cert
+        name: server-cert
+      - configMap:
           name: tls-otelcol
         name: tls-otelcol
       - configMap:
           name: otelcol
         name: otelconfig
-      - configMap:
-          name: server-cert
-        name: server-cert
       - configMap:
           name: clientca
         name: clientca

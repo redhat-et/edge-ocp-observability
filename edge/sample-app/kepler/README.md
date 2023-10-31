@@ -68,7 +68,8 @@ Download the opentelemetry config file and modify as necessary to configure rece
 
 ```bash
 oc create configmap -n kepler clientca --from-file ~/mtls/certs/cacert.pem
-oc create configmap tls-otelcol --from-file ~/mtls/certs/client.cert.pem --from-file ~/mtls/private/client.key.pem -n kepler
+oc create configmap -n kepler tls-otelcol --from-file ~/mtls/certs/client.cert.pem --from-file ~/mtls/private/client.key.pem
+oc create configmap -n kepler server-cert --from-file ~/mtls/certs/server.cert.pem
 
 curl -o microshift-otelconfig.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp-observability/main/edge/sample-app/kepler/microshift-otelconfig.yaml
 # the exporter must be configured to match the OTLP receiver running in OpenShift
@@ -77,8 +78,8 @@ curl -o microshift-otelconfig.yaml https://raw.githubusercontent.com/redhat-et/e
 oc create -n kepler -f microshift-otelconfig.yaml
 
 # patch daemonset to add a sidecar opentelemetry collector container
-curl -o /tmp/patch-sidecar-otel.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp-observability/main/edge/sample-app/kepler/patch-sidecar-otel.yaml
-oc patch daemonset kepler-exporter -n kepler --patch-file /tmp/patch-sidecar-otel.yaml
+curl -o patch-sidecar-otel.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp-observability/main/edge/sample-app/kepler/patch-sidecar-otel.yaml
+oc patch daemonset kepler-exporter -n kepler --patch-file patch-sidecar-otel.yaml
 ```
 
 Check that the kepler-exporter now includes an otc-container and that the collector is receiving and exporting metrics as expected.

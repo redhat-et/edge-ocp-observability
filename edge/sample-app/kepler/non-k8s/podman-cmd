@@ -1,4 +1,6 @@
-sudo podman run -d --rm --name otelcol-host \
+# documentation on setting up mTLS is
+# https://github.com/redhat-et/edge-ocp-observability/blob/main/observability-hub/mtls/mTLS-otel-collectors.md
+sudo podman run --rm -d --name otelcol-host \
   --network=host \
   --user=0 \
   --cap-add SYS_ADMIN \
