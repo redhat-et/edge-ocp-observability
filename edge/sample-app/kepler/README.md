@@ -49,7 +49,7 @@ oc apply --kustomize $(pwd)/manifests/config/base -n kepler
 #### Prepare mTLS certificates and keys in MicroShift and OpenShift
 
 To secure traffic from external OpenTelemetry Collector (OTC) to OpenShift OTC,
-follow the [mTLS documentation](./mtls/mTLS-otel-collectors.md). This will create a CA and
+follow the [mTLS documentation](../../../observability-hub/mtls/mTLS-otel-collectors.md). This will create a CA and
 signed certificates for both the server (OpenShift OTC) and client (edge/MicroShift OTC).
 This document also specifies the configmaps to create in the OpenShift observability namespace that are 
 mounted in OpenShift OTC deployment. 

@@ -38,7 +38,7 @@ Lastly, convert the CA cert to PEM format.
 
 ```bash
 SUBJ_EDGE="/CN=localhost/ST=NY/C=US/O=None/OU=None"
-openssl req -new -subj ${SUBJ_EDGE} -x509 -days 3650 -config openssl-ex.cnf -key demoCA/private/cakey.pem -out demoCA/certs/cacert.pem
+openssl req -new -subj ${SUBJ_EDGE} -x509 -days 3650 -config openssl.cnf -key demoCA/private/cakey.pem -out demoCA/certs/cacert.pem
 openssl x509 -in demoCA/certs/cacert.pem -out demoCA/certs/cacert.pem -outform PEM
 ```
 
@@ -119,7 +119,7 @@ EOF
 Finally, create the client certificate.
 
 ```bash
-openssl ca -config openssl-ex.cnf -extfile client_ext.cnf -days 3650 -notext -batch -in demoCA/certs/client.csr -out demoCA/certs/client.cert.pem
+openssl ca -config openssl.cnf -extfile client_ext.cnf -days 3650 -notext -batch -in demoCA/certs/client.csr -out demoCA/certs/client.cert.pem
 chmod 400 demoCA/certs/client.cert.pem
 
 # The index.txt will be updated reflecting the generated certificate:
@@ -129,7 +129,3 @@ V       311109225709Z           02      unknown /C=US/ST=NY/O=None/OU=None/CN=lo
 # The CSR can now be removed
 rm -rf demoCA/certs/client.csr
 ```
-
-
-
-

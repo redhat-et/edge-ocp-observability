@@ -18,7 +18,7 @@ On the edge device, an OpenTelemetryCollector pod can scrape PCP metrics and pus
 ### Prepare mTLS certificates and keys in both the edge and OpenShift
 
 To secure traffic from external OpenTelemetry Collector (OTC) to OpenShift OTC,
-follow the [mTLS documentation](./mtls/mTLS-otel-collectors.md). This will create a CA and
+follow the [mTLS documentation](../../observability-hub/mtls/mTLS-otel-collectors.md). This will create a CA and
 signed certificates for both the server (OpenShift OTC) and client (edge/external OTC).
 This document also specifies the configmaps to create in the observability namespace that are 
 mounted in OpenShift OTC deployment below. 

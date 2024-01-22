@@ -19,18 +19,11 @@ spec:
     global:
       ingestion: {}
   template:
-    compactor: {}
-    distributor:
-      replicas: 1
-    ingester:
-      replicas: 1
-    querier: {}
     queryFrontend:
-      component: {}
       jaegerQuery:
         enabled: true
         ingress:
-          route: {}
+          type: route
   replicationFactor: 1
   storage:
     secret:
