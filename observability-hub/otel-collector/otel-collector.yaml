@@ -7,7 +7,7 @@ metadata:
 spec:
   mode: statefulset
   replicas: 1
-  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.86.0
+  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.92.0
   volumeMounts:
   - name: clientca
     mountPath: /etc/pki/ca-trust/source/client-ca
@@ -98,7 +98,7 @@ spec:
         auth:
           authenticator: bearertokenauth
       prometheusremotewrite:
-        endpoint: http://sample-monitoring-stack-prometheus.observability.svc.cluster.local:9090/api/v1/write
+        endpoint: http://prometheus-monitoring-stack-prometheus.observability.svc.cluster.local:9090/api/v1/write
         tls:
           insecure: true
           # TODO: enable TLS

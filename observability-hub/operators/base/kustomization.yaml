@@ -6,3 +6,4 @@ resources:
 - loki-operator.yaml
 - opentelemetry-operator.yaml
 - tempo-operator.yaml
+- grafana-operator.yaml

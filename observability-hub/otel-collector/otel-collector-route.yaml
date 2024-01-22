@@ -5,7 +5,7 @@ metadata:
   namespace: observability
 spec:
   host: otc.${APPS_DOMAIN}
-  #host: otc.apps.open-svc-sts.k1wl.p1.openshiftapps.com
+  #host: apps.platform-sts.pcbk.p1.openshiftapps.com
   port:
     targetPort: otlp-http
   tls:

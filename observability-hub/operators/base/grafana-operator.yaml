@@ -1,12 +1,13 @@
+---
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
-  name: tempo-product
+  name: grafana-operator
   namespace: openshift-operators
 spec:
-  channel: stable
+  channel: v5
   installPlanApproval: Automatic
-  name: tempo-product
-  source: redhat-operators
+  name: grafana-operator
+  source: community-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: tempo-operator.v0.6.0-2
+  startingCSV: grafana-operator.v5.6.0

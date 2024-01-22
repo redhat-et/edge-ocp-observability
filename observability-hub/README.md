@@ -81,7 +81,7 @@ the above mTLS section.
 
 ```bash
 APPS_DOMAIN="apps.$(oc get dns cluster -o jsonpath='{ .spec.baseDomain }')"
-# edit observability-hub/otel-collector/tls-otel-collector-route.yaml with $APPS_DOMAIN. 
+# edit observability-hub/otel-collector/otel-collector-route.yaml with $APPS_DOMAIN. 
 oc apply --kustomize observability-hub/otel-collector
 ```
 

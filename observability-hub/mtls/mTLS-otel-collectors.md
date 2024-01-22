@@ -36,12 +36,9 @@ I am using `localhost` here, maybe replace with `$(hostname)` if desired
 Then, create the CA certificate.
 Lastly, convert the CA cert to PEM format.
 
-Note, `openssl.cnf` is from Roberto's post mentioned above.
-
 ```bash
-wget https://raw.githubusercontent.com/rcarrata/ocp4-network-security/main/mtls-ingress-operator/openssl.cnf
 SUBJ_EDGE="/CN=localhost/ST=NY/C=US/O=None/OU=None"
-openssl req -new -subj ${SUBJ_EDGE} -x509 -days 3650 -config openssl.cnf -key private/cakey.pem -out certs/cacert.pem
+openssl req -new -subj ${SUBJ_EDGE} -x509 -days 3650 -config ../openssl.cnf -key private/cakey.pem -out certs/cacert.pem
 openssl x509 -in certs/cacert.pem -out certs/cacert.pem -outform PEM
 ```
 
@@ -122,7 +119,7 @@ EOF
 Finally, create the client certificate.
 
 ```bash
-openssl ca -config openssl.cnf -extfile client_ext.cnf -days 3650 -notext -batch -in certs/client.csr -out certs/client.cert.pem
+openssl ca -config ../openssl.cnf -extfile client_ext.cnf -days 3650 -notext -batch -in certs/client.csr -out certs/client.cert.pem
 chmod 400 certs/client.cert.pem
 
 # The index.txt will be updated reflecting the generated certificate:

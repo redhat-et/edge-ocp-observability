@@ -9,4 +9,4 @@ spec:
   name: observability-operator
   source: community-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: observability-operator.v0.0.25
+  startingCSV: observability-operator.v0.0.28

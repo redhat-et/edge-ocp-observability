@@ -9,4 +9,4 @@ spec:
   name: opentelemetry-product
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: opentelemetry-operator.v0.74.0-5-0.1687199949.p
+  startingCSV: opentelemetry-operator.v0.89.0-3

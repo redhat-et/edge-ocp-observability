@@ -9,7 +9,7 @@ done
 oc apply -f $(pwd)/dashboard/02-grafana-instance.yaml
 oc apply -f $(pwd)/dashboard/03-grafana-sa-token-secret.yaml
 
-SERVICE_ACCOUNT=sample-monitoring-stack-prometheus
+SERVICE_ACCOUNT=prometheus-monitoring-stack-prometheus
 SECRET=grafana-sa-token
 
 while ! oc get serviceaccount $SERVICE_ACCOUNT -n observability
@@ -20,7 +20,7 @@ done
 oc adm policy add-cluster-role-to-user cluster-monitoring-view -z $SERVICE_ACCOUNT -n observability
 
 export BEARER_TOKEN=$(oc get secret ${SECRET} -o json -n observability | jq -Mr '.data.token' | base64 -d) || or true
-# Get bearer token for `sample-monitoring-stack-prometheus`
+# Get bearer token for `prometheus-monitoring-stack-prometheus`
 while [ -z "$BEARER_TOKEN" ]
 do
     echo waiting for service account token

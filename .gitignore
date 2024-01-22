@@ -5,8 +5,7 @@
 **/private*
 **/.raw*
 **/*.pem
-**/openssl.cnf
 **/index*
 **/serial
-**/mtls*
+observability-hub/mtls/mtls*
 **/otc*
