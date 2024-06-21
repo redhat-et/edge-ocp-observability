@@ -9,15 +9,15 @@ is created at the edge. Traffic will be secured from edge OTC to OpenShift hub O
 This assumes you are in mtls directory of this repository:
 
 ```bash
-mkdir mtls && cd mtls
-mkdir certs private
+mkdir demoCA
+mkdir demoCA/certs demoCA/private
 ```
 
 Create an index.txt and serial file to track certificates signed by the CA certificate.
 
 ```bash
-echo 01 > serial
-touch index.txt
+echo 1000 > demoCA/serial
+touch demoCA/index.txt
 ```
 
 ### Create CA (on edge/client machine)
@@ -28,7 +28,7 @@ Then the configmap will be mounted within the OTC pod.
 First, create a private key for the CA certificate.
 
 ```bash
-openssl genrsa -out private/cakey.pem 4096
+openssl genrsa -out demoCA/private/cakey.pem 4096
 ```
 
 Set the Common Name for the CA certificate.
@@ -38,20 +38,20 @@ Lastly, convert the CA cert to PEM format.
 
 ```bash
 SUBJ_EDGE="/CN=localhost/ST=NY/C=US/O=None/OU=None"
-openssl req -new -subj ${SUBJ_EDGE} -x509 -days 3650 -config ../openssl.cnf -key private/cakey.pem -out certs/cacert.pem
-openssl x509 -in certs/cacert.pem -out certs/cacert.pem -outform PEM
+openssl req -new -subj ${SUBJ_EDGE} -x509 -days 3650 -config openssl-ex.cnf -key demoCA/private/cakey.pem -out demoCA/certs/cacert.pem
+openssl x509 -in demoCA/certs/cacert.pem -out demoCA/certs/cacert.pem -outform PEM
 ```
 
 Verify the CA certificate was  generated with openssl:
 
 ```bash
-openssl x509 -in certs/cacert.pem -text -noout
+openssl x509 -in demoCA/certs/cacert.pem -text -noout
 ```
 
 The CA can now be shared with OpenShift as a configmap to be mounted in the hub OTC:
 
 ```bash
-oc create configmap -n observability clientca --from-file certs/cacert.pem
+oc create configmap -n observability clientca --from-file demoCA/certs/cacert.pem
 ```
 
 ### Create the Server certificate (using OpenShift OTC route hostname & the new CA)
@@ -59,7 +59,7 @@ oc create configmap -n observability clientca --from-file certs/cacert.pem
 Generate a private key for the server certificate:
 
 ```bash
-openssl genrsa -out private/server.key.pem 4096
+openssl genrsa -out demoCA/private/server.key.pem 4096
 ```
 
 Extract OpenShift base domain:
@@ -74,14 +74,14 @@ Note in the example OTC manifests, the OTC route hostname is
 there is a limit of 64 character length for CN. The OTC route hostname must match the CN below.
 
 ```bash
-openssl req -new -key private/server.key.pem -out server-csr.pem -subj "/CN=otc.${APPS_DOMAIN}"
-openssl x509 -req -extfile <(printf "subjectAltName=DNS:otc.${APPS_DOMAIN}") -in server-csr.pem -CA certs/cacert.pem -CAkey private/cakey.pem -CAcreateserial -out certs/server.cert.pem -days 365 -sha256
+openssl req -new -key demoCA/private/server.key.pem -out server-csr.pem -subj "/CN=otc.${APPS_DOMAIN}"
+openssl x509 -req -extfile <(printf "subjectAltName=DNS:otc.${APPS_DOMAIN}") -in server-csr.pem -CA demoCA/certs/cacert.pem -CAkey demoCA/private/cakey.pem -CAcreateserial -out demoCA/certs/server.cert.pem -days 365 -sha256
 ```
 
 Create a configmap in OpenShift observability namespace to share the server certificate and private key:
 
 ```bash
-oc create configmap tls-otelcol --from-file certs/server.cert.pem --from-file private/server.key.pem -n observability
+oc create configmap tls-otelcol --from-file demoCA/certs/server.cert.pem --from-file demoCA/private/server.key.pem -n observability
 ```
 
 The `clientca` configmap and the `tls-otelcol` configmap are mounted in the OpenShift OTC. These are
@@ -92,14 +92,14 @@ specified in the [otel-collector manifests](../otel-collector/kustomization.yaml
 First, create private key for the client certificate.
 
 ```bash
-openssl genrsa -out private/client.key.pem 4096
+openssl genrsa -out demoCA/private/client.key.pem 4096
 ```
 
 Generate Certificate Signing Request (CSR) for the client certificate.
 We will use the matching `$SUBJ_EDGE` that we used to create the CA cert above.
 
 ```bash
-openssl req -new -subj ${SUBJ_EDGE} -key private/client.key.pem -out certs/client.csr
+openssl req -new -subj ${SUBJ_EDGE} -key demoCA/private/client.key.pem -out demoCA/certs/client.csr
 ```
 
 Add certificate extensions. Create an additional configuration file with the required extensions:
@@ -119,15 +119,15 @@ EOF
 Finally, create the client certificate.
 
 ```bash
-openssl ca -config ../openssl.cnf -extfile client_ext.cnf -days 3650 -notext -batch -in certs/client.csr -out certs/client.cert.pem
-chmod 400 certs/client.cert.pem
+openssl ca -config openssl-ex.cnf -extfile client_ext.cnf -days 3650 -notext -batch -in demoCA/certs/client.csr -out demoCA/certs/client.cert.pem
+chmod 400 demoCA/certs/client.cert.pem
 
 # The index.txt will be updated reflecting the generated certificate:
-cat index.txt
+cat demoCA/index.txt
 V       311109225709Z           02      unknown /C=US/ST=NY/O=None/OU=None/CN=localhost
 
 # The CSR can now be removed
-rm -rf certs/client.csr
+rm -rf demoCA/certs/client.csr
 ```
 
 
