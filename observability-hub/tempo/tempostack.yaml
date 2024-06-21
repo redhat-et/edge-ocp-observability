@@ -15,13 +15,6 @@ spec:
   search:
     defaultResultLimit: 20
     maxDuration: 0s
-  tenants:
-    authentication:
-      - tenantId: 1610b0c3-c509-4592-a256-a1871353dbfa
-        tenantName: dev
-      - tenantId: 1610b0c3-c509-4592-a256-a1871353dbfb
-        tenantName: prod
-    mode: openshift
   limits:
     global:
       ingestion: {}
@@ -29,9 +22,6 @@ spec:
     compactor: {}
     distributor:
       replicas: 1
-    gateway:
-      component: {}
-      enabled: true
     ingester:
       replicas: 1
     querier: {}
