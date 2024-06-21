@@ -28,7 +28,7 @@ default_ca = CA_default
 
 [ CA_default ]
 dir               = ./demoCA
-certificate       = $dir/cacert.pem
+certificate       = $dir/certs/cacert.pem
 private_key       = $dir/private/cakey.pem
 new_certs_dir     = $dir/newcerts
 database          = $dir/index.txt

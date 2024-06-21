@@ -10,7 +10,7 @@ This assumes you are in mtls directory of this repository:
 
 ```bash
 mkdir demoCA
-mkdir demoCA/certs demoCA/private
+mkdir demoCA/certs demoCA/newcerts demoCA/private
 ```
 
 Create an index.txt and serial file to track certificates signed by the CA certificate.
@@ -119,8 +119,8 @@ EOF
 Finally, create the client certificate.
 
 ```bash
-openssl ca -config openssl.cnf -extfile client_ext.cnf -days 3650 -notext -batch -in demoCA/certs/client.csr -out demoCA/certs/client.cert.pem
-chmod 400 demoCA/certs/client.cert.pem
+openssl ca -config openssl.cnf -extfile client_ext.cnf -days 3650 -notext -batch -in demoCA/certs/client.csr -out demoCA/newcerts/client.cert.pem
+chmod 400 demoCA/newcerts/client.cert.pem
 
 # The index.txt will be updated reflecting the generated certificate:
 cat demoCA/index.txt
