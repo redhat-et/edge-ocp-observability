@@ -2,40 +2,20 @@
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
-  name: ingest
+  name: otlp-receiver
   namespace: observability
 spec:
-  mode: statefulset
-  replicas: 1
-  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.103.0
-  volumeMounts:
-  - name: clientca
-    mountPath: /etc/pki/ca-trust/source/client-ca
-    readOnly: true
-  - name: tls-otelcol
-    mountPath: /tls
-    readOnly: true
-  - name: cabundle-volume
-    mountPath: /etc/pki/ca-trust/source/service-ca
-    readOnly: true
-  volumes:
-  - name: tls-otelcol
-    configMap:
-      name: tls-otelcol
-  - name: clientca
-    configMap:
-      name: clientca
-  - name: cabundle-volume
-    configMap:
-      name: otelcol-cabundle
-  resources:
-    limits:
-      cpu: 100m
-      memory: 200Mi
-    requests:
-      cpu: 50m
-      memory: 50Mi
-  serviceAccount: otelcol
+  spec:
+  mode: "deployment"
+  ingress:
+    type: route
+    route:
+      termination: "passthrough"
+      #host: "otc.apps.platform-sts.pcbk.p1.openshiftapps.com"
+      targetPort: otlp-http
+      to:
+        kind: Service
+        name: otlp-receiver-collector
   config: |
     extensions:
       bearertokenauth:
@@ -58,7 +38,7 @@ spec:
       debug:
         verbosity: detailed
       otlp:
-        endpoint: tempo-tempostack-distributor.observability.svc.cluster.local:4317
+        endpoint: "tempo-<simplest>-distributor:4317"
         auth:
           authenticator: bearertokenauth
         tls:
@@ -68,4 +48,25 @@ spec:
       pipelines:
         traces:
           receivers: [otlp]
+          processors: []
           exporters: [debug]
+  volumeMounts:
+  - name: clientca
+    mountPath: /etc/pki/ca-trust/source/client-ca
+    readOnly: true
+  - name: tls-otelcol
+    mountPath: /tls
+    readOnly: true
+  - name: cabundle-volume
+    mountPath: /etc/pki/ca-trust/source/service-ca
+    readOnly: true
+  volumes:
+  - name: tls-otelcol
+    configMap:
+      name: tls-otelcol
+  - name: clientca
+    configMap:
+      name: clientca
+  - name: cabundle-volume
+    configMap:
+      name: otelcol-cabundle
