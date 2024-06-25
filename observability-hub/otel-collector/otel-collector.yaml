@@ -1,72 +1,54 @@
----
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
   name: otlp-receiver
   namespace: observability
 spec:
-  spec:
-  mode: "deployment"
-  ingress:
-    type: route
-    route:
-      termination: "passthrough"
-      #host: "otc.apps.platform-sts.pcbk.p1.openshiftapps.com"
-      targetPort: otlp-http
-      to:
-        kind: Service
-        name: otlp-receiver-collector
   config: |
-    extensions:
-      bearertokenauth:
-        scheme: "Bearer"
-        filename: "/var/run/secrets/kubernetes.io/serviceaccount/token"
     receivers:
       otlp:
         protocols:
-          grpc:
-            tls:
-              cert_file: /tls/server.cert.pem
-              key_file: /tls/server.key.pem
-              client_ca_file: /etc/pki/ca-trust/source/client-ca/cacert.pem
           http:
             tls:
-              cert_file: /tls/server.cert.pem
-              key_file: /tls/server.key.pem
-              client_ca_file: /etc/pki/ca-trust/source/client-ca/cacert.pem
+              cert_file: /certs/server.crt
+              key_file: /certs/server.key
+              client_ca_file: /certs/ca.crt
+          grpc:
+            tls:
+              cert_file: /certs/server.crt
+              key_file: /certs/server.key
+              client_ca_file: /certs/ca.crt
     exporters:
+      otlp:
+        endpoint: "tempo-tempostack-distributor.observability.svc:4317"
+        tls:
+          insecure: true
       debug:
         verbosity: detailed
-      otlp:
-        endpoint: "tempo-<simplest>-distributor:4317"
-        auth:
-          authenticator: bearertokenauth
+      otlp/1:
+        endpoint: "jaeger-allinone-collector.observability.svc:4317"
         tls:
-          ca_file: "/etc/pki/ca-trust/source/service-ca/service-ca.crt"
+          insecure: true
     service:
-      extensions: [bearertokenauth]
       pipelines:
         traces:
           receivers: [otlp]
           processors: []
-          exporters: [debug]
+          exporters: [debug, otlp]
+  ingress:
+    route:
+      termination: passthrough
+    type: route
+  mode: deployment
   volumeMounts:
-  - name: clientca
-    mountPath: /etc/pki/ca-trust/source/client-ca
-    readOnly: true
-  - name: tls-otelcol
-    mountPath: /tls
-    readOnly: true
-  - name: cabundle-volume
-    mountPath: /etc/pki/ca-trust/source/service-ca
-    readOnly: true
+  - mountPath: /etc/pki/ca-trust/source/service-ca
+    name: otelcol-cabundle
+  - mountPath: /certs
+    name: mtls-certs
   volumes:
-  - name: tls-otelcol
-    configMap:
-      name: tls-otelcol
-  - name: clientca
-    configMap:
-      name: clientca
-  - name: cabundle-volume
-    configMap:
+  - configMap:
+      name: mtls-certs
+    name: mtls-certs
+  - configMap:
       name: otelcol-cabundle
+    name: otelcol-cabundle

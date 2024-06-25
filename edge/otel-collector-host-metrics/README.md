@@ -6,13 +6,13 @@ in OpenShift.
 
 Refer to the [opentelemetry-collector-contrib/receiver/hostmetricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/README.md) for all available configuration options.
 
-### Prepare mTLS certificates and keys in both the edge and OpenShift
+#### Prepare mTLS certificates and keys in both the edge and OpenShift
 
 To secure traffic from external OpenTelemetry Collector (OTC) to OpenShift OTC,
-follow the [mTLS documentation](../../observability-hub/mtls/mTLS-otel-collectors.md). This will create a CA and
+you can use this [script](./mtls/generate_certs.sh) to create a CA and generate
 signed certificates for both the server (OpenShift OTC) and client (edge/external OTC).
-This document also specifies the configmaps to create in the observability namespace that are 
-mounted in OpenShift OTC deployment below. 
+This script also creates the configmap, `mtls-certs`, in the observability namespace that
+is mounted in OpenShift OTC deployment below.
 
 ### RHEL machine
 
@@ -57,22 +57,22 @@ service:
 ```bash
 mkdir otc # for file-storage extension, if configured
 
-# Note the mtls directory must exist at $(pwd)/.
+# Note the `certs` directory must exist at $(pwd)/.
 
-sudo podman run -d --rm --name otelcol-host \
+sudo podman run --rm -d --name otelcol-host \
   --network=host \
   --user=0 \
   --cap-add SYS_ADMIN \
   --tmpfs /tmp --tmpfs /run  \
   -v /var/log/:/var/log  \
-  -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
   -v /:/hostfs:ro \
-  -v $(pwd)/mtls/certs/server.cert.pem:/conf/server.cert.pem:Z \
-  -v $(pwd)/mtls/certs/client.cert.pem:/conf/client.cert.pem:Z \
-  -v $(pwd)/mtls/private/client.key.pem:/conf/client.key.pem:Z \
+  -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+  -v $(pwd)/certs/server.crt:/conf/server.crt.pem:Z \
+  -v $(pwd)/certs/server.key:/conf/server.key:Z \
+  -v $(pwd)/certs/ca.crt:/conf/ca.crt:Z \
   -v $(pwd)/otelcol-config.yaml:/etc/otelcol-contrib/config.yaml:Z \
   -v $(pwd)/otc:/otc:Z  \
-  quay.io/sallyom/otelcolcontrib:ubi9 --config=file:/etc/otelcol-contrib/config.yaml
+  ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:latest --config=file:/etc/otelcol-contrib/config.yaml
 ```
 
 #### Deploy Grafana and the Prometheus DataSource

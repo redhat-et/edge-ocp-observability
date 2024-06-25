@@ -3,6 +3,5 @@ kind: Kustomization
   
 namespace: observability
 resources:
-- otelcol-cabundle.yaml
 # mTLS configmaps clientca & tls-otelcol must exist before applying
 - otel-collector.yaml

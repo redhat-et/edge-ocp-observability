@@ -23,7 +23,7 @@ oc apply --kustomize observability-hub/operators/base
 
 #### Operator descriptions
 
-1. **Red Hat OpenShift distributed tracing data collection**: The OpenTelemetry Collector (OTC) is provided from this operator. OTC will expose
+1. **Red Hat Build of OpenTelemetry**: The OpenTelemetry Collector (OTC) is provided from this operator. OTC will expose
 an OTLP receiver endpoint for edge devices. Metrics, logs and traces will be distributed from the OTC to various backends, all running
 within the observability namespace (Loki, Tempo, Grafana, Prometheus).
 
@@ -44,7 +44,32 @@ Create the observablity hub namespace `observability`. If a different namespace 
 oc create ns observability
 ```
 
-#### Metrics Backend (Prometheus with Thanos sidecar)
+#### Prepare mTLS certificates and keys in both the edge and OpenShift
+
+To secure traffic from external OpenTelemetry Collector (OTC) to OpenShift OTC,
+you can use this [script](./mtls/generate_certs.sh) to create a CA and generate
+signed certificates for both the server (OpenShift OTC) and client (edge/external OTC).
+This script also creates the configmap, `mtls-certs`, in the observability namespace that
+is mounted in OpenShift OTC deployment below.
+
+#### OpenTelemetryCollector deployment
+
+Notice the otel-collector manifests assume the `mtls-certs` configmap exists from
+the above mTLS section.
+
+```bash
+oc apply --kustomize observability-hub/otel-collector
+```
+
+#### Tracing Backend (Tempo with Minio for S3 storage)
+
+```bash
+# edit storageclassName & secret as necessary
+# secret and storage for testing only
+oc apply --kustomize observability-hub/tempo
+```
+
+#### Metrics Backend (Prometheus)
 
 ```bash
 oc apply --kustomize observability-hub/prometheus
@@ -56,33 +81,6 @@ oc apply --kustomize observability-hub/prometheus
 # edit storageclassName & secret as necessary
 # secret and storage for testing only
 oc apply --kustomize observability-hub/loki
-```
-
-#### Tracing Backend (Tempo with Minio for S3 storage)
-
-```bash
-# edit storageclassName & secret as necessary
-# secret and storage for testing only
-oc apply --kustomize observability-hub/tempo
-```
-
-#### Prepare mTLS certificates and keys in both the edge and OpenShift
-
-To secure traffic from external OpenTelemetry Collector (OTC) to OpenShift OTC,
-follow the [mTLS documentation](./mtls/mTLS-otel-collectors.md). This will create a CA and
-signed certificates for both the server (OpenShift OTC) and client (edge/external OTC).
-This document also specifies the configmaps to create in the observability namespace that are 
-mounted in OpenShift OTC deployment below. 
-
-#### OpenTelemetryCollector deployment
-
-Notice the otel-collector manifests assume the `clientca` and `tls-otelcol` configmaps exist from
-the above mTLS section.
-
-```bash
-APPS_DOMAIN="apps.$(oc get dns cluster -o jsonpath='{ .spec.baseDomain }')"
-# edit observability-hub/otel-collector/otel-collector-route.yaml with $APPS_DOMAIN. 
-oc apply --kustomize observability-hub/otel-collector
 ```
 
 #### Grafana 

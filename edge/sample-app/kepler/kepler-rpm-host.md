@@ -27,13 +27,13 @@ curl -o otelcol-config.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp
 Substitute the otlp-endpoint for `OCP_ROUTE_OTELCOL` in [otelcol-config.yaml](./non-k8s/otelcol-config.yaml).
 This file must exist in the directory from where the otel collector pod is launched below.
 
-#### Prepare mTLS certificates and keys at the edge and in OpenShift
+#### Prepare mTLS certificates and keys in both the edge and OpenShift
 
 To secure traffic from external OpenTelemetry Collector (OTC) to OpenShift OTC,
-follow the [mTLS documentation](../../../observability-hub/mtls/mTLS-otel-collectors.md). This will create a CA and
-signed certificates for both the server (OpenShift OTC) and client (edge OTC).
-This document also specifies the configmaps to create in the OpenShift observability namespace that are 
-mounted in OpenShift OTC deployment. 
+you can use this [script](./mtls/generate_certs.sh) to create a CA and generate
+signed certificates for both the server (OpenShift OTC) and client (edge/external OTC).
+This script also creates the configmap, `mtls-certs`, in the observability namespace that
+is mounted in OpenShift OTC deployment below.
 
 #### Deploy OpenTelemetry Collector pod
 
@@ -41,19 +41,19 @@ Note that this pod is running with elevated privilege. This is to be expected, s
 In the future, the privilege required to run Kepler can be fine-tuned.
 
 ```bash
-sudo podman run --rm --name otelcol-host \
+sudo podman run --rm -d --name otelcol-host \
   --network=host \
   --user=0 \
   --cap-add SYS_ADMIN \
   --tmpfs /tmp --tmpfs /run  \
   -v /var/log/:/var/log  \
   -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
-  -v $(pwd)/mtls/certs/server.cert.pem:/conf/server.cert.pem:Z \
-  -v $(pwd)/mtls/certs/client.cert.pem:/conf/client.cert.pem:Z \
-  -v $(pwd)/mtls/private/client.key.pem:/conf/client.key.pem:Z \
+  -v $(pwd)/certs/server.crt:/conf/server.crt.pem:Z \
+  -v $(pwd)/certs/server.key:/conf/server.key:Z \
+  -v $(pwd)/certs/ca.crt:/conf/ca.crt:Z \
   -v $(pwd)/otelcol-config.yaml:/etc/otelcol-contrib/config.yaml:Z \
   -v $(pwd)/otc:/otc:Z  \
-  quay.io/sallyom/otelcolcontrib:ubi9 --config=file:/etc/otelcol-contrib/config.yaml
+  ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:latest --config=file:/etc/otelcol-contrib/config.yaml
 ```
 
 Metrics will be sent from kepler to an OpenTelemetry Collector pod running in OpenShift. From there,
