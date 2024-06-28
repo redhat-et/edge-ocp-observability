@@ -19,6 +19,12 @@ spec:
               key_file: /certs/server.key
               client_ca_file: /certs/ca.crt
     exporters:
+      prometheus:
+        endpoint: 0.0.0.0:8889
+        resource_to_telemetry_conversion:
+          enabled: true
+        metric_expiration: 180m
+        add_metric_suffixes: false
       otlp:
         endpoint: "tempo-tempostack-distributor.observability.svc:4317"
         tls:
@@ -35,11 +41,18 @@ spec:
           receivers: [otlp]
           processors: []
           exporters: [debug, otlp]
+        metrics:
+          receivers: [otlp]
+          processors: []
+          exporters: [debug,prometheus]
   ingress:
     route:
       termination: passthrough
     type: route
   mode: deployment
+  observability:
+    metrics:
+      enableMetrics: true
   volumeMounts:
   - mountPath: /etc/pki/ca-trust/source/service-ca
     name: otelcol-cabundle

@@ -5,21 +5,23 @@
 apiVersion: integreatly.org/v1alpha1
 kind: GrafanaDataSource
 metadata:
-  name: prometheus-grafana
+  name: prometheus
   namespace: observability
 spec:
   datasources:
-    - access: proxy
-      editable: true
-      isDefault: true
-      jsonData:
-        httpHeaderName1: 'Authorization'
-        timeInterval: 5s
-        tlsSkipVerify: true
+    - basicAuthUser: internal
       name: prometheus
+      access: proxy
+      editable: true
       secureJsonData:
-        # Update bearer token to match your environment
         httpHeaderValue1: 'Bearer ${BEARER_TOKEN}'
       type: prometheus
-      url: 'http://prometheus-monitoring-stack-prometheus.observability.svc.cluster.local:9090'
-  name: prometheus-grafana.yaml
+      url: 'https://thanos-querier.openshift-monitoring.svc.cluster.local:9091'
+      jsonData:
+        httpHeaderName1: Authorization
+        timeInterval: 5s
+        tlsSkipVerify: true
+      basicAuth: false
+      isDefault: true
+      version: 1
+  name: prometheus.yaml
