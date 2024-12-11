@@ -1,18 +1,11 @@
-apiVersion: integreatly.org/v1alpha1
+apiVersion: grafana.integreatly.org/v1beta1
 kind: Grafana
 metadata:
-  name: rhel-edge
+  name: mygrafana
   namespace: observability
 serviceAccount: "grafana-serviceaccount"
 spec:
-  baseImage: 'docker.io/grafana/grafana:8.5.5'
-  ingress:
-    enabled: true
   config:
-    auth:
-      disable_signout_menu: true
-    auth.anonymous:
-      enabled: true
     log:
       level: warn
       mode: console
@@ -24,4 +17,4 @@ spec:
         - key: app
           operator: In
           values:
-            - grafana
+            - mygrafana

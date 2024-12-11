@@ -5,3 +5,4 @@ namespace: observability
 resources:
 # mTLS configmaps clientca & tls-otelcol must exist before applying
 - otel-collector.yaml
+- otelcol-cabundle.yaml

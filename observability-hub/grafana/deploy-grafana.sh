@@ -1,6 +1,6 @@
 #!/bin/sh
 
-oc apply -f $(pwd)/dashboard/01-grafana-operator.yaml
+oc apply -f ../operators/base/grafana-operator.yaml
 while ! oc get grafana --all-namespaces
 do
     echo waiting for grafana custom resource definition to register

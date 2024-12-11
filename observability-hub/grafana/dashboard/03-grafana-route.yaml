@@ -1,0 +1,15 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: mygrafana-route
+  namespace: observability
+spec:
+  to:
+    kind: Service
+    name: mygrafana-service
+    weight: 100
+  port:
+    targetPort: grafana
+  tls:
+    termination: edge
+  wildcardPolicy: None

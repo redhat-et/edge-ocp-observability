@@ -69,15 +69,9 @@ oc apply --kustomize observability-hub/otel-collector
 oc apply --kustomize observability-hub/tempo
 ```
 
-#### Metrics Backend (Prometheus)
-
-```bash
-oc apply --kustomize observability-hub/prometheus
-```
-
 #### Logging Backend (TBD)
 
-#### Grafana 
+#### Metrics Backend & Grafana 
 
 This will deploy a Grafana operator in -n observability, a Grafana instance, and a Prometheus DataSource
 The Grafana console is configured with `username: rhel, password: rhel`
