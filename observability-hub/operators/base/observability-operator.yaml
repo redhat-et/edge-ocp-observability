@@ -5,8 +5,9 @@ metadata:
   namespace: openshift-operators
 spec:
   channel: development
-  installPlanApproval: Automatic
-  name: observability-operator
-  source: community-operators
+  name: cluster-observability-operator
+  source: redhat-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: observability-operator.v0.0.28
+  startingCSV: cluster-observability-operator.0.4.1
+
+

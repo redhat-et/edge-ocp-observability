@@ -3,7 +3,7 @@ kind: Kustomization
   
 resources:
 - observability-operator.yaml
-- loki-operator.yaml
+- cluster-logging-operator.yaml
 - opentelemetry-operator.yaml
 - tempo-operator.yaml
 - grafana-operator.yaml

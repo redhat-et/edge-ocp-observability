@@ -25,12 +25,12 @@ oc apply --kustomize observability-hub/operators/base
 
 1. **Red Hat Build of OpenTelemetry**: The OpenTelemetry Collector (OTC) is provided from this operator. OTC will expose
 an OTLP receiver endpoint for edge devices. Metrics, logs and traces will be distributed from the OTC to various backends, all running
-within the observability namespace (Loki, Tempo, Grafana, Prometheus).
+within the observability namespace (Vektor, Tempo, Grafana, Prometheus).
 
 2. **Observability Operator**: Provides Prometheus APIs and monitoring stack using Prometheus, Alertmanager and Thanos Querier.
 Thanos Receive can also be deployed as a sidecar to Prometheus, to enable a remote-write endpoint for the OTC.
 
-3. **Loki Operator**: Provides `LokiStack` API. Loki is the backend for logging.
+3. **Cluster-Logging Operator**: Provides `Vektor` API. Vektor is the backend for logging.
 
 4. **Tempo Operator**: Provides `TempoStack` API. This is the backend for distributed tracing. An S3-compatible storage (Minio) will be paired with Tempo.
 
@@ -75,13 +75,7 @@ oc apply --kustomize observability-hub/tempo
 oc apply --kustomize observability-hub/prometheus
 ```
 
-#### Logging Backend (Loki with Minio container for s3 storage)
-
-```bash
-# edit storageclassName & secret as necessary
-# secret and storage for testing only
-oc apply --kustomize observability-hub/loki
-```
+#### Logging Backend (TBD)
 
 #### Grafana 
 
