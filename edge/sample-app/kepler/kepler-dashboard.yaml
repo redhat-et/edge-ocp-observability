@@ -1,9 +1,12 @@
-apiVersion: integreatly.org/v1alpha1
 kind: GrafanaDashboard
+apiVersion: grafana.integreatly.org/v1beta1
 metadata:
   name: kepler
   namespace: observability
   labels:
     app: grafana
 spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: mygrafana   # This label matches the mygrafana Grafana instance
   url: https://raw.githubusercontent.com/sustainable-computing-io/kepler/main/grafana-dashboards/Kepler-Exporter.json

@@ -20,7 +20,7 @@ The rest of this documents assumes:
 #### Obtain the OpenShift OpenTelemetry Collector endpoint and update the collector config
 
 ```bash
-oc -n observability get route otc -o jsonpath='{.status.ingress[*].host}'
+oc -n observability get route otlp-http-otlp-receiver-route  -o jsonpath='{.status.ingress[*].host}'
 curl -o otelcol-config.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp-observability/main/edge/sample-app/kepler/non-k8s/otelcol-config.yaml
 ```
 

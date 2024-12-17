@@ -1,0 +1,49 @@
+extensions:
+  file_storage:
+    # this dir must exist on filesystem where otelcollector is running
+    directory: /otc
+    timeout: 10s
+receivers:
+  journald:
+    directory: /var/log/journal/
+    units:
+      - kepler
+      #- microshift
+      #- ovn-kubernetes
+      #- crio
+    priority: info
+  prometheus:
+    config:
+      scrape_configs:
+      - job_name: 'kepler-local'
+        scrape_interval: 5s
+        static_configs:
+        - targets: ['127.0.0.1:8888'] # instrumented app endpoint
+processors:
+  batch:
+  memory_limiter:
+    check_interval: 5s
+    limit_percentage: 95
+    spike_limit_percentage: 25
+exporters:
+  otlphttp:
+    #endpoint: https://OCP_ROUTE_OTELCOL
+    endpoint: https://otlp-http-otlp-receiver-route-observability.apps.rosa.y6gdz-px5d6-xeh.86pq.p3.openshiftapps.com
+    #endpoint: https://otc.apps.open-svc-sts.k1wl.p1.openshiftapps.com
+    tls:
+      insecure: false
+      cert_file: /conf/client.cert.pem
+      key_file: /conf/client.key.pem
+      ca_file: /conf/server.cert.pem
+  logging:
+    verbosity: detailed
+service:
+  extensions: [file_storage]
+  telemetry:
+    metrics:
+      level: detailed
+      address: 0.0.0.0:8887
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      exporters: [otlphttp]
