@@ -2,7 +2,7 @@
 
 The following cmd will:
 - Deploy Grafana operator in -n obervability
-- Create and configure Grafana instance in -n observability
+- Create and configure Grafana instance and route in -n observability
 - Define Prometheus datasource in Grafana
 
 ```bash

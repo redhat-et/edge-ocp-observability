@@ -27,9 +27,6 @@ oc apply --kustomize observability-hub/operators/base
 an OTLP receiver endpoint for edge devices. Metrics, logs and traces will be distributed from the OTC to various backends, all running
 within the observability namespace (Vektor, Tempo, Grafana, Prometheus).
 
-2. **Observability Operator**: Provides Prometheus APIs and monitoring stack using Prometheus, Alertmanager and Thanos Querier.
-Thanos Receive can also be deployed as a sidecar to Prometheus, to enable a remote-write endpoint for the OTC.
-
 3. **Cluster-Logging Operator**: Provides `Vektor` API. Vektor is the backend for logging.
 
 4. **Tempo Operator**: Provides `TempoStack` API. This is the backend for distributed tracing. An S3-compatible storage (Minio) will be paired with Tempo.
@@ -52,6 +49,14 @@ signed certificates for both the server (OpenShift OTC) and client (edge/externa
 This script also creates the configmap, `mtls-certs`, in the observability namespace that
 is mounted in OpenShift OTC deployment below.
 
+#### Tracing Backend (Tempo with Minio for S3 storage)
+
+```bash
+# edit storageclassName & secret as necessary
+# secret and storage for testing only
+oc apply --kustomize observability-hub/tempo
+```
+
 #### OpenTelemetryCollector deployment
 
 Notice the otel-collector manifests assume the `mtls-certs` configmap exists from
@@ -59,14 +64,6 @@ the above mTLS section.
 
 ```bash
 oc apply --kustomize observability-hub/otel-collector
-```
-
-#### Tracing Backend (Tempo with Minio for S3 storage)
-
-```bash
-# edit storageclassName & secret as necessary
-# secret and storage for testing only
-oc apply --kustomize observability-hub/tempo
 ```
 
 #### Logging Backend (TBD)

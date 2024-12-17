@@ -1,7 +1,5 @@
-# 1. Grant `cluster-monitoring-view` role to the `grafana-serviceaccount`
-#  oc adm policy add-cluster-role-to-user cluster-monitoring-view -z grafana-serviceaccount
-# 2. Get bearer token for `grafana-serviceaccount`. Update manifest.
-#  oc serviceaccounts get-token grafana-serviceaccount -n thanos
+# 1. Grant `cluster-monitoring-view` role to the `mygrafana-sa`
+#  oc adm policy add-cluster-role-to-user cluster-monitoring-view -z mygrafana-sa
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDatasource
 metadata:
@@ -10,17 +8,19 @@ metadata:
 spec:
   instanceSelector:
     matchLabels:
-      dashboards: mygrafana
+      dashboards: mygrafana   # This label matches the mygrafana Grafana instance
   datasource:
-    basicAuthUser: internal
     name: prometheus
     access: proxy
     editable: true
-    secureJsonData:
-      httpHeaderValue1: 'Bearer ${BEARER_TOKEN}'
     type: prometheus
     url: 'https://thanos-querier.openshift-monitoring.svc.cluster.local:9091'
-    basicAuth: false
     isDefault: true
-    version: 1
-  name: prometheus.yaml
+    jsonData:
+      httpHeaderName1: 'Authorization'
+      timeInterval: 5s
+      tlsSkipVerify: true
+      name: Prometheus
+    secureJsonData:
+      httpHeaderValue1: 'Bearer ${BEARER_TOKEN}'
+    name: prometheus.yaml

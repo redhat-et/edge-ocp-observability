@@ -3,7 +3,8 @@ kind: Grafana
 metadata:
   name: mygrafana
   namespace: observability
-serviceAccount: "grafana-serviceaccount"
+  labels:
+    dashboards: mygrafana
 spec:
   config:
     log:

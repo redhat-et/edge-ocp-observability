@@ -9,9 +9,12 @@ done
 oc apply -f $(pwd)/dashboard/02-grafana-serviceaccount.yaml
 oc apply -f $(pwd)/dashboard/02-grafana-sa-token-secret.yaml
 oc apply -f $(pwd)/dashboard/02-grafana-instance.yaml
+oc apply -f $(pwd)/dashboard/03-grafana-route.yaml
+oc adm policy add-cluster-role-to-user cluster-monitoring-view -z mygrafana-sa
 
 MONITORING_NS=observability
 SECRET=grafana-sa-token
+
 # Define Prometheus datasource
 export BEARER_TOKEN=$(echo $(oc get secret $SECRET -n $MONITORING_NS -o json | jq -r '.data.token') | base64 -d)
 while [ -z "$BEARER_TOKEN" ]
@@ -30,3 +33,4 @@ done
 
 # Deploy from updated manifest
 envsubst < $(pwd)/dashboard/03-grafana-datasource-UPDATETHIS.yaml | oc apply -f -
+

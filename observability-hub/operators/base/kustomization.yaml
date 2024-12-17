@@ -5,4 +5,4 @@ resources:
 - cluster-logging-operator.yaml
 - opentelemetry-operator.yaml
 - tempo-operator.yaml
-#- grafana-operator.yaml
+- grafana-operator.yaml
