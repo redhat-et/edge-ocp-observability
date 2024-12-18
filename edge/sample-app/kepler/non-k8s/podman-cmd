@@ -7,9 +7,9 @@ sudo podman run --rm -d --name otelcol-host \
   --tmpfs /tmp --tmpfs /run  \
   -v /var/log/:/var/log  \
   -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
-  -v $(pwd)/certs/server.crt:/conf/server.crt.pem:Z \
-  -v $(pwd)/certs/server.key:/conf/server.key:Z \
-  -v $(pwd)/certs/ca.crt:/conf/ca.crt:Z \
+  -v $(pwd)/demoCA/server.crt:/conf/server.crt:Z \
+  -v $(pwd)/demoCA/server.key:/conf/server.key:Z \
+  -v $(pwd)/demoCA/ca.crt:/conf/ca.crt:Z \
   -v $(pwd)/otelcol-config.yaml:/etc/otelcol-contrib/config.yaml:Z \
   -v $(pwd)/otc:/otc:Z  \
-  ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:latest --config=file:/etc/otelcol-contrib/config.yaml
+  ghcr.io/os-observability/redhat-opentelemetry-collector/redhat-opentelemetry-collector:v0.113.0

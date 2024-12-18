@@ -1,87 +1,87 @@
-## Kepler on MicroShift in a RHEL based distribution
-
-This assumes MicroShift is installed on a RHEL based machine.
-SSH into the virtual machine.
-
-### Execute below commands from within the RHEL machine
-
-#### Start MicroShift service (if not already running)
-
-```bash
-sudo systemctl enable --now microshift
-mkdir ~/.kube
-sudo cp /var/lib/microshift/resources/kubeadmin/kubeconfig ~/.kube/config
-sudo chown -R $UID:$UID ~/.kube
-oc get pods -A # all pods should soon be running
-```
-
-#### Kepler Deployment
+## Kepler from RPM on a host (non-K8s)
 
 Kepler is a research project that that uses eBPF to probe CPU performance counters and Linux kernel tracepoints
-to calculate an application's carbon footprint. Refer to [Kepler documentation](https://sustainable-computing.io/) for further information.
+to calculate an application's energy consumption. Refer to [Kepler documentation](https://sustainable-computing.io/) for further information.
 
-> **Note**
-> For running in MicroShift on Red Hat Device Edge, I've found it's easiest to use `kustomize` to apply kepler manifests,
-> and a standalone OpenTelemetry Collector either with podman or as a sidecar container in the kepler-exporter DaemonSet.
-> On other systems where resource constraints are less of a concern, `helm` and `opentelemetry operator` offer convenience.
+Kepler can run from an RPM without the need for Kubernetes based system. To install Kepler as an RPM
+and manage it as a systemd service, follow [kepler RPM install documentation](https://sustainable-computing.io/installation/kepler-rpm/).
+
+Kepler metrics can be pushed to an OpenShift cluster where it can be visualized centrally with Grafana and a Prometheus Datasource.
+(Grafana & Prometheus can also run as pods without K8s but for this example we'll use
+[this OpenShift observability setup](../../../observability-hub/README.md).
+
+The rest of this documents assumes:
+
+1. Kepler is running as a systemd service
+2. An observability hub is running in OpenShift that the system running Kepler has access to.
+
+### Collect Kepler metrics with OpenTelemetry Collector
+
+#### Obtain the OpenShift OpenTelemetry Collector endpoint
 
 ```bash
-git clone https://github.com/sustainable-computing-io/kepler.git
-cd kepler
+oc -n observability get route otlp-http-otlp-receiver-route  -o jsonpath='{.status.ingress[*].host}'
 ```
 
-#### Modify Kepler manifests for OpenShift
+#### Update the edge collector config
 
-Uncomment the OpenShift lines in `manifests/config/exporter/kustomization.yaml`
-(`Line#3` and `Line#16` at time of this writing),
-and remove the `[]` in the line `- patchesStrategicMerge: []`. Then, apply
-the kepler manifests.
-
-```bash
-oc create ns kepler
-oc label ns kepler security.openshift.io/scc.podSecurityLabelSync=false
-oc label ns kepler --overwrite pod-security.kubernetes.io/enforce=privileged
-oc apply --kustomize $(pwd)/manifests/config/base -n kepler
-
-# Check that kepler pod is up and running before proceeding
 ```
+# download then update the sample otelcol-config
+curl -o otelcol-config.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp-observability/main/edge/sample-app/kepler/non-k8s/otelcol-config.yaml
+```
+
+Substitute the otlp-endpoint for `OCP_ROUTE_OTELCOL` in [otelcol-config.yaml](./non-k8s/otelcol-config.yaml).
 
 #### Prepare mTLS certificates and keys in both the edge and OpenShift
 
 To secure traffic from external OpenTelemetry Collector (OTC) to OpenShift OTC,
-you can use this [script](./mtls/generate_certs.sh) to create a CA and generate
+you can use this [script](../../../observability-hub/mtls/generate_certs.sh) to create a CA and generate
 signed certificates for both the server (OpenShift OTC) and client (edge/external OTC).
 This script also creates the configmap, `mtls-certs`, in the observability namespace that
 is mounted in OpenShift OTC deployment below.
 
-### Launch OpenTelemetry Collector to receive and export kepler metrics
+#### Deploy OpenTelemetry Collector
 
-The OpenTelemetry Collector can run as a sidecar container to the kepler exporter DaemonSet.
-Metrics will be sent from kepler to an OpenTelemetry Collector pod running in OpenShift. From there,
-a `prometheusremotewrite` opentelemetry collector exporter will send metrics to a Prometheus pod,
-and a Prometheus datasource in Grafana will be used to visualize the data. 
+The opentelemetry collector can be run as a container or with an rpm install and systemd service. Choose 1 of the following.
 
-#### Add collector sidecar to kepler exporter daemonset
+##### Option 1: Opentelemetry Collector container
 
-Run the following to launch an OpenTelemetry Collector sidecar container in the kepler-exporter Daemonset.
-Download the opentelemetry config file and modify as necessary to configure receivers and exporters.
+Note that this pod is running with elevated privilege. This is to be expected, since Kepler probes the kernel for data.
+In the future, the privilege required to run Kepler can be fine-tuned.
+
+Notice the mTLS certs are located at `$(pwd)/demoCA` directory. Also a data directory must exist at `$(pwd)/otc`.
 
 ```bash
-oc create configmap -n kepler mtls-certs --from-file ~/certs/ca.crt --from-file ~/certs/server.crt --from-file ~/certs/server.key
-
-curl -o microshift-otelconfig.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp-observability/main/edge/sample-app/kepler/microshift-otelconfig.yaml
-# the exporter must be configured to match the OTLP receiver running in OpenShift
-# replace $APPS_DOMAIN
-
-oc create -n kepler -f microshift-otelconfig.yaml
-
-# patch daemonset to add a sidecar opentelemetry collector container
-curl -o patch-sidecar-otel.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp-observability/main/edge/sample-app/kepler/patch-sidecar-otel.yaml
-oc patch daemonset kepler-exporter -n kepler --patch-file patch-sidecar-otel.yaml
+sudo podman run --rm -d --name otelcol-host \
+  --network=host \
+  --user=0 \
+  --cap-add SYS_ADMIN \
+  --tmpfs /tmp --tmpfs /run  \
+  -v /var/log/:/var/log  \
+  -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+  -v $(pwd)/demoCA/server.crt:/conf/server.crt:Z \
+  -v $(pwd)/demoCA/server.key:/conf/server.key:Z \
+  -v $(pwd)/demoCA/ca.crt:/conf/ca.crt:Z \
+  -v $(pwd)/otelcol-config.yaml:/etc/otelcol-contrib/config.yaml:Z \
+  -v $(pwd)/otc:/otc:Z  \
+  ghcr.io/os-observability/redhat-opentelemetry-collector/redhat-opentelemetry-collector:v0.113.0
 ```
 
-Check that the kepler-exporter now includes an otc-container and that the collector is receiving and exporting metrics as expected.
-Finally, [deploy grafana in OpenShift with a prometheus datasource to view the metrics.](#deploy-grafana-and-the-prometheus-datasource-with-kepler-dashboard)
+##### Option 2: Install Red Hat build of Opentelemetry Collector rpm
+
+This assumes you are running on RHEL. If running on fedora, you can enable the copr repository for the opentelemetry-collector RPM with
+In the otelcol-config.yaml, update the location of the TLS certs to match where they are on the local filesystem. 
+
+```bash
+# If not on RHEL, enable the copr repo
+sudo dnf copr enable frzifus/redhat-opentelemetry-collector-main
+sudo dnf install -y opentelemetry-collector
+sudo cp otelcol-config.yaml /etc/opentelemetry-collector/01-otelcolconfig.yaml
+sudo systemctl enable opentelemetry-collector --now
+```
+
+Metrics will be sent from kepler to an OpenTelemetry Collector pod running in OpenShift. From there,
+a Prometheus datasource in Grafana will be used to visualize the data. 
 
 ### Deploy Grafana and the Prometheus DataSource with Kepler Dashboard
 
@@ -98,8 +98,6 @@ oc apply -f edge-ocp-observability/edge/sample-app/kepler/kepler-dashboard.yaml
 If Grafana is not running in OpenShift,
 To deploy Grafana with a Prometheus DataSource in OpenShift, follow [OpenShift observability hub: Grafana](../../../observability-hub/grafana/README.md)
 Then, deploy the Kepler dashboard with the above command.
-
-You should now be able to access Grafana with `username: rhel` and `password:rhel` from the grafana route.
 
 You should now be able to access Grafana with `username: rhel` and `password:rhel` from the grafana route.
 

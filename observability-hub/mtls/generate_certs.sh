@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Create a directory to store certificates
-CERT_DIR="/tmp/demoCA"
+CERT_DIR="demoCA"
 rm -rf "$CERT_DIR"
 mkdir -p "$CERT_DIR"
 

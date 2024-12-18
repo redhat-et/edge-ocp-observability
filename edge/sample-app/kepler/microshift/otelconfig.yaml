@@ -27,7 +27,7 @@ data:
         spike_limit_percentage: 25
       batch:
     exporters:
-      logging:
+      debug:
         verbosity: detailed
       otlphttp:
         endpoint: https://otc.$APPS_DOMAIN
@@ -45,5 +45,5 @@ data:
       pipelines:
         metrics:
           receivers: [prometheus]
-          exporters: [otlphttp]
+          exporters: [otlphttp, debug]
 
