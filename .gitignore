@@ -7,6 +7,7 @@
 **/*.pem
 **/index*
 **/serial
-observability-hub/mtls/demoCA*
-observability-hub/mtls/client_ext.cnf*
+**/venv**
+**/demoCA**
+**/client_ext.cnf*
 **/otc*

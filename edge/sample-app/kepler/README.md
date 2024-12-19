@@ -17,29 +17,6 @@ The rest of this documents assumes:
 
 ### Collect Kepler metrics with OpenTelemetry Collector
 
-#### Obtain the OpenShift OpenTelemetry Collector endpoint
-
-```bash
-oc -n observability get route otlp-http-otlp-receiver-route  -o jsonpath='{.status.ingress[*].host}'
-```
-
-#### Update the edge collector config
-
-```
-# download then update the sample otelcol-config
-curl -o otelcol-config.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp-observability/main/edge/sample-app/kepler/non-k8s/otelcol-config.yaml
-```
-
-Substitute the otlp-endpoint for `OCP_ROUTE_OTELCOL` in [otelcol-config.yaml](./non-k8s/otelcol-config.yaml).
-
-#### Prepare mTLS certificates and keys in both the edge and OpenShift
-
-To secure traffic from external OpenTelemetry Collector (OTC) to OpenShift OTC,
-you can use this [script](../../../observability-hub/mtls/generate_certs.sh) to create a CA and generate
-signed certificates for both the server (OpenShift OTC) and client (edge/external OTC).
-This script also creates the configmap, `mtls-certs`, in the observability namespace that
-is mounted in OpenShift OTC deployment below.
-
 #### Deploy OpenTelemetry Collector
 
 The opentelemetry collector can be run as a container or with an rpm install and systemd service. Choose 1 of the following.
@@ -77,7 +54,44 @@ In the otelcol-config.yaml, update the location of the TLS certs to match where 
 sudo dnf copr enable frzifus/redhat-opentelemetry-collector-main
 sudo dnf install -y opentelemetry-collector
 sudo cp otelcol-config.yaml /etc/opentelemetry-collector/01-otelcolconfig.yaml
-sudo systemctl enable opentelemetry-collector --now
+```
+
+#### Prepare mTLS certificates and keys in both the edge and OpenShift
+
+To secure traffic from external OpenTelemetry Collector (OTC) to OpenShift OTC,
+you can use this [script](../../../observability-hub/mtls/generate_certs.sh) to create a CA and generate
+signed certificates for both the server (OpenShift OTC) and client (edge/external OTC).
+This script also creates the configmap, `mtls-certs`, in the observability namespace that
+is mounted in OpenShift OTC deployment below.
+
+With the RH build of OpenTelemetry RPM, the opentelemetry-collector runs as the `observability` user, so permission must be granted to that user
+to read the certs.
+
+```bash
+sudo mkdir -p /etc/opentelemetry-collector/certs && sudo cp demoCA/* /etc/opentelemetry-collector/certs/.
+sudo chown -R observability:observability /etc/opentelemetry-collector/certs
+```
+
+#### Obtain the OpenShift OpenTelemetry Collector endpoint
+
+```bash
+oc -n observability get route otlp-http-otlp-receiver-route  -o jsonpath='{.status.ingress[*].host}'
+```
+
+#### Update the edge collector config
+
+```
+# download then update the sample otelcol-config
+curl -o otelcol-config.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp-observability/main/edge/sample-app/kepler/non-k8s/otelcol-config.yaml
+```
+
+Substitute the otlp-endpoint for `OCP_ROUTE_OTELCOL` in [otelcol-config.yaml](./non-k8s/otelcol-config.yaml).
+
+#### Run the opentelemetry-collector
+
+```
+sudo systemctl daemon-reload
+sudo systemctl start opentelemetry-collector
 ```
 
 Metrics will be sent from kepler to an OpenTelemetry Collector pod running in OpenShift. From there,

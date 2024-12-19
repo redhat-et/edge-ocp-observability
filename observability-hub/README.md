@@ -86,7 +86,7 @@ Now that the observability stack is up and running, edge workloads can now send 
 
 [Configure edge OTC to send Systemd logs and CRIO traces](../edge/otel-collector-infra/README.md)
 
-[Push Kepler metrics from host to OpenShift observability stack](../edge/sample-app/kepler/kepler-rpm-host.md)
+[Push Kepler metrics from host to OpenShift observability stack](../edge/sample-app/kepler/README.md)
 
-[Push MicroShift application (Kepler)  metrics to OpenShift observability stack](../edge/sample-app/kepler/README.md)
+[Push MicroShift application (Kepler)  metrics to OpenShift observability stack](../edge/sample-app/kepler/microshift/README.md)
 

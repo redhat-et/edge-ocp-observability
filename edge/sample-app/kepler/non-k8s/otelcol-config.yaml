@@ -9,6 +9,7 @@ receivers:
     directory: /var/log/journal/
     units:
       - kepler
+      - opentelemetry-collector
     priority: info
   prometheus:
     config:
@@ -30,9 +31,10 @@ exporters:
     endpoint: https://OCP_ROUTE_OTELCOL
     tls:
       insecure: false
-      cert_file: /tmp/demoCA/server.crt
-      key_file: /tmp/demoCA/server.key
-      ca_file: /tmp/demoCA/ca.crt
+      # Update location of certs if necessary
+      cert_file: /etc/opentelemetry-collector/certs/server.crt
+      key_file: /etc/opentelemetry-collector/certs/server.key
+      ca_file: /etc/opentelemetry-collector/certs/ca.crt
   debug:
     verbosity: detailed
 
@@ -47,3 +49,7 @@ service:
       receivers: [prometheus]
       processors: [batch, memory_limiter]
       exporters: [otlphttp, debug]
+    traces:
+      receivers: [otlp]
+      exporters: [otlphttp, debug]
+
