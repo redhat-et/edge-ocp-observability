@@ -26,3 +26,9 @@ Jaeger UI from OpenShift showing traces from edge machine
 
 ![Jaeger traces exported from virtual machine](images/localjaeger.png)
 
+### Additional Links
+
+[Red Hat Build of OpenTelemetry documentation](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/deploying_rhel_9_on_amazon_web_services/configuring-the-opentelemetry-collector-for-rhel-on-cloud_deploying-a-virtual-machine-on-aws#configuring-the-opentelemetry-collector-for-journald-logging_configuring-the-opentelemetry-collector-for-rhel-on-cloud)
+
+[Deploying Grafana on OpenShift & Integrating with Cluster Metrics](https://cloud.redhat.com/experts/o11y/ocp-grafana/)
+

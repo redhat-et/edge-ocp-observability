@@ -1,19 +1,22 @@
 #!/bin/sh
 
+MONITORING_NS=observability
+SECRET=grafana-sa-token
+
 oc apply -f ../operators/base/grafana-operator.yaml
 while ! oc get grafana --all-namespaces
 do
     echo waiting for grafana custom resource definition to register
     sleep 5
 done
-oc apply -f $(pwd)/dashboard/02-grafana-serviceaccount.yaml
-oc apply -f $(pwd)/dashboard/02-grafana-sa-token-secret.yaml
-oc apply -f $(pwd)/dashboard/02-grafana-instance.yaml
-oc apply -f $(pwd)/dashboard/03-grafana-route.yaml
+oc apply -f $(pwd)/instance-with-prom-ds/02-grafana-serviceaccount.yaml -n $MONITORING_NS
+oc apply -f $(pwd)/instance-with-prom-ds/02-grafana-sa-token-secret.yaml -n $MONITORING_NS
+oc apply -f $(pwd)/instance-with-prom-ds/02-grafana-instance.yaml -n $MONITORING_NS
+oc apply -f $(pwd)/instance-with-prom-ds/03-grafana-route.yaml -n $MONITORING_NS
 oc adm policy add-cluster-role-to-user cluster-monitoring-view -z mygrafana-sa
+oc adm policy add-cluster-role-to-user openshift-cluster-monitoring-view -z mygrafana-sa
+oc adm policy add-role-to-user edit -z mygrafana-sa -n $MONITORING_NS
 
-MONITORING_NS=observability
-SECRET=grafana-sa-token
 
 # Define Prometheus datasource
 export BEARER_TOKEN=$(echo $(oc get secret $SECRET -n $MONITORING_NS -o json | jq -r '.data.token') | base64 -d)
@@ -32,5 +35,5 @@ do
 done
 
 # Deploy from updated manifest
-envsubst < $(pwd)/dashboard/03-grafana-datasource-UPDATETHIS.yaml | oc apply -f -
+envsubst < $(pwd)/instance-with-prom-ds/03-grafana-datasource-UPDATETHIS.yaml | oc apply -f -
 
