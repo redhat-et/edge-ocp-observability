@@ -80,8 +80,8 @@ spec:
   - mountPath: /certs
     name: mtls-certs
   volumes:
-  - configMap:
-      name: mtls-certs
+  - secret:
+      secretName: mtls-certs
     name: mtls-certs
   - configMap:
       name: otelcol-cabundle

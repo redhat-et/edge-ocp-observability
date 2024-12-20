@@ -61,7 +61,7 @@ sudo cp otelcol-config.yaml /etc/opentelemetry-collector/01-otelcolconfig.yaml
 To secure traffic from external OpenTelemetry Collector (OTC) to OpenShift OTC,
 you can use this [script](../../../observability-hub/mtls/generate_certs.sh) to create a CA and generate
 signed certificates for both the server (OpenShift OTC) and client (edge/external OTC).
-This script also creates the configmap, `mtls-certs`, in the observability namespace that
+This script also creates the secret, `mtls-certs`, in the observability namespace that
 is mounted in OpenShift OTC deployment below.
 
 With the RH build of OpenTelemetry RPM, the opentelemetry-collector runs as the `observability` user, so permission must be granted to that user

@@ -51,7 +51,7 @@ oc apply --kustomize $(pwd)/manifests/config/base -n kepler
 To secure traffic from external OpenTelemetry Collector (OTC) to OpenShift OTC,
 you can use this [script](./mtls/generate_certs.sh) to create a CA and generate
 signed certificates for both the server (OpenShift OTC) and client (edge/external OTC).
-This script also creates the configmap, `mtls-certs`, in the observability namespace that
+This script also creates the secret, `mtls-certs`, in the observability namespace that
 is mounted in OpenShift OTC deployment below.
 
 ### Launch OpenTelemetry Collector to receive and export kepler metrics
@@ -67,7 +67,7 @@ Run the following to launch an OpenTelemetry Collector sidecar container in the 
 Download the opentelemetry config file and modify as necessary to configure receivers and exporters.
 
 ```bash
-oc create configmap -n kepler mtls-certs --from-file ~/certs/ca.crt --from-file ~/certs/server.crt --from-file ~/certs/server.key
+oc create secret generic -n kepler mtls-certs --from-file ~/certs/ca.crt --from-file ~/certs/server.crt --from-file ~/certs/server.key
 
 curl -o otelconfig.yaml https://raw.githubusercontent.com/redhat-et/edge-ocp-observability/main/edge/sample-app/kepler/microshift/otelconfig.yaml
 # the exporter must be configured to match the OTLP receiver running in OpenShift

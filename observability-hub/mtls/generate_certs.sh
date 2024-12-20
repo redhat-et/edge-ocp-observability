@@ -42,12 +42,12 @@ openssl req -new -x509 -days 365 -key "$CERT_DIR/server.key" -out "$CERT_DIR/ca.
 echo "Certificates generated successfully in $CERT_DIR directory."
 
 # Delete any existing ConfigMaps
-oc delete configmap -n observability mtls-certs
+oc delete secret -n observability mtls-certs
 
-# Create a Kubernetes ConfigMap for the server certificate, private key, and CA certificate in observability namespace
-oc create configmap mtls-certs -n observability \
+# Create a Kubernetes Secret for the server certificate, private key, and CA certificate in observability namespace
+oc create secret generic mtls-certs -n observability \
   --from-file=server.crt="$CERT_DIR/server.crt" \
   --from-file=server.key="$CERT_DIR/server.key" \
   --from-file=ca.crt="$CERT_DIR/ca.crt"
 
-echo "ConfigMap created successfully."
+echo "mtls-certs secret created successfully."
