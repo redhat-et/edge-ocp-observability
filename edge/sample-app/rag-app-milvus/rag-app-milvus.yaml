@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rag-app-milvus
+spec:
+  hostNetwork: true
+  containers:
+  - name: milvus-standalone
+    image: quay.io/redhat-et/milvus:ubi9.5
+    args: ["milvus", "run", "standalone"]
+    env:
+    - name: ETCD_DATA_DIR
+      value: /var/lib/milvus/etcd
+    - name: ETCD_USE_EMBED
+      value: true
+    - name: COMMON_STORAGETYPE
+      value: local
+    volumeMounts:
+    - name: milvus-data
+      mountPath: /var/lib/milvus
+    - name: milvus-configs
+      mountPath: /etc/milvus/configs
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: 9091
+      initialDelaySeconds: 90
+      periodSeconds: 30
+      timeoutSeconds: 20
+      failureThreshold: 3
+
+  - name: rag-inference-app
+    image: quay.io/sallyom/rag:otlp
+    env:
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://127.0.0.1:4317
+    - name: MODEL_ENDPOINT
+      # UPDATE THIS
+      value: http://192.168.1.225:8001
+    #- name: MODEL_ENDPOINT_BEARER
+    #  value: "xxx"
+    - name: VECTORDB_VENDOR
+      value: milvus
+    - name: VECTORDB_PORT
+      value: 19530
+    - name: VECTORDB_HOST
+      value: 127.0.0.1
+
+  volumes:
+  - name: milvus-data
+    hostPath:
+      # UPDATE THIS
+      path: /somewhere/volumes/milvus
+      type: Directory
+  - name: milvus-configs
+    hostPath:
+      # UPDATE THIS, and populate directory with embedEtcd.yaml
+      path: /somewhere/milvus-configs
+      type: Directory
