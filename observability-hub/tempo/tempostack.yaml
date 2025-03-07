@@ -4,32 +4,69 @@ metadata:
   name: tempostack
   namespace: observability
 spec:
-  observability:
-    tracing:
-      jaeger_agent_endpoint: 'localhost:6831'
-  resources:
-    total:
-      limits:
-        cpu: '2'
-        memory: 2Gi
-  search:
-    defaultResultLimit: 20
-    maxDuration: 0s
+  hashRing:
+    memberlist: {}
+  images: {}
   limits:
     global:
       ingestion: {}
-  template:
-    queryFrontend:
-      jaegerQuery:
-        enabled: true
-        ingress:
-          type: route
+      query:
+        maxSearchDuration: 0s
+  managementState: Managed
+  observability:
+    grafana:
+      instanceSelector: {}
+    metrics: {}
+    tracing:
+      jaeger_agent_endpoint: localhost:6831
   replicationFactor: 1
+  resources: {}
+  retention:
+    global:
+      traces: 48h0m0s
+  search:
+    defaultResultLimit: 20
+    maxDuration: 0s
   storage:
     secret:
       name: minio-tempo
       type: s3
+    tls:
+      enabled: false
   storageSize: 1Gi
-  retention:
-    global:
-      traces: 48h0m0s
+  template:
+    compactor:
+      replicas: 1
+    distributor:
+      component:
+        replicas: 1
+      tls:
+        enabled: false
+    gateway:
+      component:
+        replicas: 1
+      enabled: false
+      ingress:
+        route: {}
+    ingester:
+      replicas: 1
+    querier:
+      replicas: 1
+    queryFrontend:
+      component:
+        replicas: 1
+      jaegerQuery:
+        authentication:
+          enabled: true
+          sar: '{"namespace": "observability", "resource": "pods", "verb": "get"}'
+        enabled: true
+        ingress:
+          route:
+            termination: edge
+          type: route
+        monitorTab:
+          enabled: false
+          prometheusEndpoint: ""
+        servicesQueryDuration: 72h0m0s
+        tempoQuery: {}
+  timeout: 30s
