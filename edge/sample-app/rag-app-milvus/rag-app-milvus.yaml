@@ -3,10 +3,13 @@ kind: Pod
 metadata:
   name: rag-app-milvus
 spec:
-  hostNetwork: true
   containers:
   - name: milvus-standalone
     image: quay.io/redhat-et/milvus:ubi9.5
+    ports:
+    - containerPort: 19530
+      hostPort: 19530
+      name: http
     args: ["milvus", "run", "standalone"]
     env:
     - name: ETCD_DATA_DIR
@@ -31,12 +34,16 @@ spec:
 
   - name: rag-inference-app
     image: quay.io/sallyom/rag:otlp
+    ports:
+    - containerPort: 8501
+      hostPort: 8501
+      name: http
     env:
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: http://127.0.0.1:4317
+      value: http://192.168.1.225:4317
     - name: MODEL_ENDPOINT
       # UPDATE THIS
-      value: http://192.168.1.225:8001
+      value: http://127.0.0.1:50817
     #- name: MODEL_ENDPOINT_BEARER
     #  value: "xxx"
     - name: VECTORDB_VENDOR
@@ -50,10 +57,11 @@ spec:
   - name: milvus-data
     hostPath:
       # UPDATE THIS
-      path: /somewhere/volumes/milvus
+      path: /Users/somalley/volumes/milvus
       type: Directory
   - name: milvus-configs
     hostPath:
       # UPDATE THIS, and populate directory with embedEtcd.yaml
-      path: /somewhere/milvus-configs
+      path: /Users/somalley/git/redhat-et/edge-ocp-observability/edge/sample-app/rag-app-milvus
+      #path: /somewhere/milvus-configs
       type: Directory
